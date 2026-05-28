@@ -1,0 +1,11 @@
+fastapi
+uvicorn[standard]
+sqlalchemy>=2.0.0
+aiosqlite
+polars
+orjson
+pydantic>=2.9.0
+python-multipart
+openpyxl
+pyxlsb
+fsspec

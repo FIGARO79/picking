@@ -1,0 +1,10 @@
+{
+  "warehouse_name": "VESPACIANO",
+  "carriers": [
+    "DHL Express",
+    "FedEx",
+    "Coordinadora",
+    "Servientrega",
+    "VALE"
+  ]
+}

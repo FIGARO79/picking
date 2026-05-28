@@ -1,0 +1,974 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500;700&display=swap');
+
+/* Variables de Diseño SAP Fiori Quartz / Belize */
+:root {
+  --font-sans: 'Inter', 'Roboto', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: 'Roboto Mono', monospace;
+
+  /* Colores Fiori Quartz Light */
+  --bg-app: #f7f7f7;
+  --bg-card: #ffffff;
+  
+  --primary: #285f94; /* Belize Blue */
+  --primary-hover: #1e4a74;
+  --primary-light: rgba(40, 95, 148, 0.05);
+  
+  --secondary: #6a6d70;
+  --secondary-hover: #4b4d4f;
+  
+  --accent: #354a5f; /* Shell Dark Gray/Blue */
+  
+  --text-main: #000000;
+  --text-muted: #6a6d70;
+  --text-light: #767676;
+  
+  --border-color: #d9d9d9;
+  --border-focus: #285f94;
+  
+  /* Semantic Colors Fiori */
+  --success: #107e3e;
+  --success-light: #f1fdf6;
+  --warning: #e9730c;
+  --warning-light: #fef9f0;
+  --danger: #bb0000;
+  --danger-light: #fef6f6;
+  
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 0 2px rgba(0,0,0,0.1), 0 2px 8px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 0 2px rgba(0,0,0,0.1), 0 4px 16px rgba(0, 0, 0, 0.15);
+  --shadow-premium: 0 0 2px rgba(0,0,0,0.1), 0 8px 24px rgba(0, 0, 0, 0.15);
+  
+  --radius-sm: 4px; /* Fiori original 4px para botones e inputs */
+  --radius-md: 4px;
+  --radius-lg: 6px;
+  --radius-full: 9999px;
+  
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.2s cubic-bezier(0.1, 0.9, 0.2, 1);
+  
+  /* SAP Fiori variables nativas (para compatibilidad total si se requieren) */
+  --sap-primary: #285f94;
+  --sap-primary-dark: #1e4a74;
+  --sap-bg: #f7f7f7;
+  --sap-surface: #ffffff;
+  --sap-text: #000000;
+  --sap-border: #d9d9d9;
+  --sap-input-border: #89919a;
+  --sap-success: #107e3e;
+  --sap-warning: #e9730c;
+  --sap-error: #bb0000;
+  --sap-table-border: #e5e5e5;
+  --sap-list-hover: #f5f5f5;
+}
+
+/* Reset y Base */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--bg-app);
+  color: var(--text-main);
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-size: 0.875rem; /* 14px */
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+}
+
+/* Scrollbar moderno */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: var(--radius-full);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Layout y Contenedores */
+.app-container {
+  display: flex;
+  min-height: 100vh;
+}
+
+.main-content {
+  flex-grow: 1;
+  padding: 2rem;
+  overflow-y: auto;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    padding: 1rem;
+  }
+}
+
+/* Tipografía y Encabezados */
+h1 {
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: var(--primary);
+  margin-bottom: 1rem;
+}
+
+h2 {
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: var(--accent);
+}
+
+h3 {
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: var(--accent);
+}
+
+p {
+  color: var(--text-muted);
+}
+
+.text-mono {
+  font-family: var(--font-mono);
+}
+
+/* Formularios e Inputs compactos de 36px */
+.form-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin-bottom: 0.35rem;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="password"],
+select,
+textarea {
+  width: 100%;
+  height: 36px; /* 36px original Fiori */
+  padding: 0 0.75rem;
+  border: 1px solid #89919a; /* Borde input SAP Fiori */
+  background-color: var(--bg-card);
+  border-radius: var(--radius-sm);
+  color: var(--text-main);
+  font-size: 0.875rem;
+  transition: var(--transition-fast);
+  outline: none;
+}
+
+textarea {
+  height: auto;
+  padding: 0.5rem 0.75rem;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+input[type="password"]:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 2px rgba(40, 95, 148, 0.1);
+}
+
+input:disabled,
+select:disabled,
+textarea:disabled {
+  background-color: #f1f5f9;
+  color: var(--text-light);
+  cursor: not-allowed;
+  border-color: var(--border-color);
+}
+
+/* Botones Fiori compactos de 36px */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  height: 36px;
+  padding: 0 1.25rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  border: 1px solid transparent;
+  user-select: none;
+  font-family: inherit;
+}
+
+.btn-primary {
+  background-color: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--primary-hover);
+  border-color: var(--primary-hover);
+}
+
+.btn-secondary {
+  background-color: transparent;
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: rgba(40, 95, 148, 0.05);
+}
+
+.btn-danger {
+  background-color: transparent;
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.btn-danger:hover:not(:disabled) {
+  background-color: rgba(187, 0, 0, 0.05);
+}
+
+.btn-success {
+  background-color: var(--success);
+  border-color: var(--success);
+  color: white;
+}
+
+.btn-success:hover:not(:disabled) {
+  background-color: #0d6b34;
+  border-color: #0d6b34;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: #e5e5e5;
+  color: #999;
+  border-color: #d9d9d9;
+}
+
+/* Tablas Fiori con gradiente original */
+.table-container {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.875rem;
+}
+
+th {
+  background: linear-gradient(180deg, #4a5f7f 0%, #3d5068 100%) !important; /* Gradiente Fiori */
+  color: #ffffff !important;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.5rem 0.75rem; /* Más compacto */
+  border-bottom: 1px solid var(--sap-table-border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+td {
+  padding: 0.5rem 0.75rem; /* Más compacto */
+  border-bottom: 1px solid var(--sap-table-border);
+  font-size: 0.875rem;
+  color: var(--text-main);
+  vertical-align: middle;
+  transition: var(--transition-fast);
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+tr.hoverable:hover {
+  background-color: #f5f5f5;
+}
+
+/* Tarjetas y Contenedores de Información */
+.card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition-normal);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+/* Utilidades de Estado / Insignias */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.625rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.badge-success {
+  background-color: var(--success-light);
+  color: var(--success);
+  border: 1px solid #a7f3d0;
+}
+
+.badge-warning {
+  background-color: var(--warning-light);
+  color: var(--warning);
+  border: 1px solid #fde68a;
+}
+
+.badge-danger {
+  background-color: var(--danger-light);
+  color: var(--danger);
+  border: 1px solid #fca5a5;
+}
+
+.badge-info {
+  background-color: var(--primary-light);
+  color: var(--primary);
+  border: 1px solid #bfdbfe;
+}
+
+/* Modales e Interfaces de Diálogo */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(4px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.modal-content {
+  background-color: var(--bg-card);
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  width: 100%;
+  max-width: 500px;
+  box-shadow: var(--shadow-premium);
+  overflow: hidden;
+  animation: modal-enter var(--transition-normal);
+}
+
+@keyframes modal-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.97) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Clases de Impresión y Formato Físico */
+@media print {
+  body {
+    background-color: white !important;
+    color: black !important;
+    font-size: 10pt;
+  }
+  
+  .no-print {
+    display: none !important;
+  }
+  
+  .print-page-break {
+    page-break-after: always;
+  }
+  
+  .main-content {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: none !important;
+    width: 100% !important;
+  }
+  
+  .table-container {
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+  
+  th {
+    background-color: transparent !important;
+    color: black !important;
+    border-bottom: 1.5pt solid black !important;
+  }
+  
+  td {
+    border-bottom: 0.5pt solid #ccc !important;
+  }
+}
+
+/* Botones de acción en tablas */
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+}
+
+.btn-action-text {
+  background: transparent;
+  border: none;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-decoration: none;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+}
+
+.btn-action-text.print {
+  color: var(--primary);
+}
+
+.btn-action-text.print:hover {
+  color: var(--primary-hover);
+}
+
+.btn-action-text.delete {
+  color: var(--danger);
+}
+
+.btn-action-text.delete:hover {
+  color: #dc2626;
+}
+
+.btn-action-text.edit {
+  color: var(--text-muted);
+}
+
+.btn-action-text.edit:hover {
+  color: var(--primary);
+}
+
+/* ==========================================================================
+   Sección Específica de Auditoría de Picking (Estilo Fiori Quartz/Belize)
+   ========================================================================== */
+
+.audit-active-container {
+  max-width: 1024px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.audit-card {
+  background-color: var(--bg-card);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-md);
+}
+
+.audit-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 1rem;
+}
+
+.audit-title-group {
+  flex-grow: 1;
+}
+
+.audit-title {
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: #285f94; /* Belize Blue */
+  margin-bottom: 0.25rem;
+}
+
+.audit-metadata {
+  display: flex;
+  gap: 1.5rem;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  flex-wrap: wrap;
+}
+
+.audit-metadata strong {
+  color: var(--text-main);
+  font-family: var(--font-mono);
+}
+
+.cancel-exit-btn {
+  /* Botón Cancelar/Salir estilo Fiori secundario compacto */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  padding: 0 0.75rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  background-color: transparent;
+  border: 1px solid var(--primary);
+  color: var(--primary);
+  transition: all 0.2s;
+}
+
+.cancel-exit-btn:hover {
+  background-color: rgba(40, 95, 148, 0.05);
+}
+
+/* Selector de Bultos */
+.package-selector-bar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  background-color: #f8fafc;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.selector-title {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.package-buttons {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.pkg-btn-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pkg-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid #cbd5e1;
+  background-color: white;
+  color: #475569;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.pkg-btn:hover {
+  border-color: var(--primary);
+}
+
+.pkg-btn.active {
+  background-color: var(--primary);
+  color: white;
+  border-color: var(--primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.pkg-measure-btn {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background-color: white;
+  border: 1px solid var(--primary);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s;
+  padding: 0;
+}
+
+.pkg-measure-btn:hover {
+  background-color: #f1f5f9;
+  transform: scale(1.1);
+}
+
+.pkg-has-dims {
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #107e3e; /* Success Green */
+  border: 1px solid white;
+}
+
+.pkg-controls {
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.pkg-control-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid;
+  cursor: pointer;
+  transition: all 0.2s;
+  padding: 0;
+}
+
+.pkg-control-btn.add {
+  border-color: var(--primary);
+  background-color: white;
+  color: var(--primary);
+}
+
+.pkg-control-btn.add:hover {
+  background-color: var(--primary);
+  color: white;
+}
+
+.pkg-control-btn.remove {
+  border-color: #fca5a5;
+  background-color: #fef2f2;
+  color: #ef4444;
+}
+
+.pkg-control-btn.remove:hover {
+  background-color: #ef4444;
+  color: white;
+  border-color: #ef4444;
+}
+
+.pkg-info-text {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-style: italic;
+  margin-left: auto;
+}
+
+/* Barra de Escaneo */
+.scan-bar {
+  margin-bottom: 1.5rem;
+  background-color: white;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 1rem;
+}
+
+.scan-input-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.scan-input-wrapper {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.scan-input-wrapper input {
+  flex-grow: 1;
+  text-transform: uppercase;
+  font-size: 0.9375rem;
+  letter-spacing: 0.05em;
+  height: 38px;
+}
+
+.scan-trigger-btn {
+  height: 38px;
+  width: 38px;
+  min-width: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border-color);
+  background-color: white;
+  color: var(--text-muted);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s;
+  padding: 0;
+}
+
+.scan-trigger-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background-color: #f8fafc;
+}
+
+.scan-search-btn {
+  height: 38px;
+}
+
+/* Tabla de Auditoría */
+.audit-items-table {
+  margin-bottom: 1.5rem;
+}
+
+.audit-items-table table {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.row-complete td {
+  background-color: #f0fdf4 !important;
+  color: #166534 !important;
+}
+
+.row-excess td {
+  background-color: #fef2f2 !important;
+  color: #991b1b !important;
+}
+
+.sku-code {
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.sku-desc {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+.pkg-distributions {
+  display: flex;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+  margin-top: 0.25rem;
+}
+
+.pkg-dist-badge {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  background-color: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+  padding: 0.0625rem 0.3125rem;
+  border-radius: 4px;
+}
+
+.finalize-audit-btn {
+  width: 100%;
+  height: 44px;
+  font-size: 1rem;
+  font-weight: 600;
+  margin-top: 1.5rem;
+  border-radius: var(--radius-sm);
+}
+
+/* Modales Premium Fiori */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(4px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.modal-content {
+  background-color: white;
+  border-radius: 6px;
+  box-shadow: var(--shadow-premium);
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  width: 100%;
+  animation: modal-enter 0.2s cubic-bezier(0.1, 0.9, 0.2, 1);
+}
+
+.qty-modal {
+  border-top: 4px solid var(--primary);
+  max-width: 380px;
+  padding: 1.5rem;
+}
+
+.qty-item-desc {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+  text-align: center;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.qty-stats {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.875rem;
+  background-color: #f8fafc;
+  border: 1px solid var(--border-color);
+  padding: 0.75rem;
+  border-radius: 4px;
+  margin-bottom: 1.5rem;
+}
+
+.qty-input-group {
+  margin-bottom: 1.5rem;
+}
+
+.qty-main-input {
+  text-align: center;
+  font-size: 2.25rem !important;
+  font-weight: 600;
+  height: 72px !important;
+  border: 2px solid var(--primary) !important;
+  border-radius: 6px;
+  outline: none;
+  background-color: white;
+}
+
+.qty-main-input:focus {
+  box-shadow: 0 0 0 4px rgba(40, 95, 148, 0.15);
+}
+
+.modal-actions {
+  display: grid;
+  grid-template-cols: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.modal-actions .btn {
+  height: 38px;
+}
+
+.diff-confirm-modal {
+  border-top: 4px solid var(--warning);
+  max-width: 400px;
+  padding: 1.5rem;
+}
+
+.diff-alert-text {
+  font-size: 0.9375rem;
+  color: var(--text-main);
+  margin-bottom: 1.5rem;
+  line-height: 1.4;
+}
+
+/* Modal de Asignación */
+.assignment-modal {
+  border-top: 4px solid var(--primary);
+  max-width: 800px;
+  padding: 1.5rem;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.75rem;
+}
+
+.modal-header h3 {
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: var(--accent);
+}
+
+.close-btn {
+  background: transparent;
+  border: none;
+  font-size: 1.25rem;
+  cursor: pointer;
+  color: var(--text-light);
+  line-height: 1;
+}
+
+.close-btn:hover {
+  color: var(--text-main);
+}
+
+.assign-desc {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin-bottom: 1.25rem;
+}
+
+.assignment-table-container {
+  max-height: 350px;
+  overflow-y: auto;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  margin-bottom: 1.5rem;
+}
+
+.assignment-pkg-input {
+  width: 64px !important;
+  text-align: center;
+  height: 28px !important;
+  padding: 0 0.25rem !important;
+  border-radius: 4px !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+/* Fade in animation */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
