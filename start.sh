@@ -1,7 +1,6 @@
 #!/bin/bash
 
 # Script de inicio rápido concurrente para la aplicación de Auditoría de Picking
-# Detener el script completo si falla algún comando crítico
 set -e
 
 PROJECT_ROOT="/home/fabio/picking"
@@ -27,11 +26,24 @@ echo "  -> Instalando / actualizando dependencias de Python..."
 pip install --upgrade pip
 pip install -r requirements.txt
 
+# --- INTEGRACIÓN DE NODEENV (AUTOINSTALACIÓN DE NPM EN VENV) ---
+echo "🔍 Verificando Node.js y npm en el entorno virtual..."
+if ! command -v npm &> /dev/null; then
+    echo "  -> npm no detectado. Instalando nodeenv y configurando Node.js dentro del venv..."
+    pip install nodeenv
+    nodeenv -p
+    
+    # Recargar el entorno virtual para que el bash actual detecte los comandos de node y npm
+    source venv/bin/activate
+    echo "  -> ✅ Node.js y npm instalados correctamente en el entorno virtual."
+fi
+# ---------------------------------------------------------------
+
 # 2. Verificar dependencias de Node (Frontend)
 echo "📦 2. Verificando dependencias del Frontend..."
 cd "$FRONTEND_DIR"
 if [ ! -d "node_modules" ]; then
-    echo "  -> Instalando paquetes de node..."
+    echo "  -> Instalando paquetes de node con el npm local..."
     npm install
 fi
 
@@ -55,16 +67,16 @@ source venv/bin/activate
 python -m uvicorn main:app --host 127.0.0.1 --port 8000 --reload > "$PROJECT_ROOT/backend.log" 2>&1 &
 BACKEND_PID=$!
 
-# Esperar un segundo a que el backend monte
 sleep 1.5
 
 # Arrancar Frontend (Vite) en el puerto 5173
 echo "  -> Iniciando Frontend (React + Vite) en el puerto 5173..."
 cd "$FRONTEND_DIR"
+# Asegurarse de tener el entorno activado antes de ejecutar Vite para que exista npm
+source "$BACKEND_DIR/venv/bin/activate"
 npm run dev &
 FRONTEND_PID=$!
 
-# Esperar a que el frontend levante y abrir navegador automáticamente
 sleep 2.5
 echo "  -> Abriendo la aplicación en tu navegador predeterminado..."
 if command -v xdg-open > /dev/null; then
@@ -81,5 +93,4 @@ echo "📝 Logs de Backend guardados en: $PROJECT_ROOT/backend.log"
 echo "=========================================================="
 echo "Presiona Ctrl+C para detener ambos servicios."
 
-# Mantener el script activo esperando los procesos de fondo
 wait
