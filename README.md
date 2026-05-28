@@ -45,12 +45,23 @@ chmod +x start.sh
 
 #### Windows
 
+**Opción A — Descargar ZIP (sin Git)**
+
+1. Ve a **https://github.com/FIGARO79/picking**
+2. Haz clic en el botón verde **`< > Code`** → **`Download ZIP`**
+3. Extrae el ZIP en la carpeta que prefieras (ej: `C:\picking`)
+4. Dentro de la carpeta extraída, haz **doble clic en `start.bat`**
+
+**Opción B — Clonar con Git**
+
 ```bat
-REM Doble clic en start.bat o ejecutar desde CMD:
+REM Desde CMD o PowerShell:
+git clone https://github.com/FIGARO79/picking.git
+cd picking
 start.bat
 ```
 
-> El script de Windows abre dos ventanas en segundo plano (Backend y Frontend) y lanza el navegador automáticamente.
+> En ambos casos, el script `start.bat` instala Python y todas las dependencias automáticamente. Solo necesitas tener **Node.js** instalado previamente (https://nodejs.org).
 
 ### 🌐 URLs de acceso
 
@@ -160,12 +171,23 @@ chmod +x start.sh
 
 #### Windows
 
+**Opção A — Baixar ZIP (sem Git)**
+
+1. Acesse **https://github.com/FIGARO79/picking**
+2. Clique no botão verde **`< > Code`** → **`Download ZIP`**
+3. Extraia o ZIP na pasta de sua preferência (ex: `C:\picking`)
+4. Dentro da pasta extraída, dê **duplo clique em `start.bat`**
+
+**Opção B — Clonar com Git**
+
 ```bat
-REM Duplo clique em start.bat ou executar pelo CMD:
+REM Pelo CMD ou PowerShell:
+git clone https://github.com/FIGARO79/picking.git
+cd picking
 start.bat
 ```
 
-> O script do Windows abre duas janelas em segundo plano (Backend e Frontend) e inicia o navegador automaticamente.
+> Em ambos os casos, o script `start.bat` instala o Python e todas as dependências automaticamente. Você só precisa ter o **Node.js** instalado previamente (https://nodejs.org).
 
 ### 🌐 URLs de acesso
 
