@@ -19,13 +19,14 @@
 
 ### 🛠️ Requisitos previos
 
-| Herramienta | Versión mínima | Notas |
-|-------------|----------------|-------|
-| **Python** | 3.10+ | Necesario para el backend |
-| **Node.js** | 18+ | Necesario para el frontend |
-| **npm** | 8+ | Se instala junto con Node.js |
+| Herramienta | Versión mínima | ¿Auto-instalado? | Notas |
+|-------------|----------------|-----------------|-------|
+| **Python** | 3.10+ | ✅ Sí (Windows, vía UV) | En Linux/macOS debe estar instalado |
+| **Node.js** | 18+ | ❌ No, manual | Descargar en https://nodejs.org |
+| **npm** | 8+ | ✅ Sí | Se incluye con Node.js |
 
-> **Windows**: El script `start.bat` instala Python automáticamente vía [Astral UV](https://docs.astral.sh/uv/) si no está disponible. No necesitas instalar Python manualmente.
+> ⚠️ **Windows**: El script `start.bat` instala Python automáticamente mediante [Astral UV](https://docs.astral.sh/uv/), pero **Node.js debe instalarse manualmente** antes de ejecutar el script.
+> 👉 Descarga Node.js LTS aqui: **https://nodejs.org/es/download**
 
 ### 🚀 Instalación y ejecución
 
@@ -61,7 +62,8 @@ cd picking
 start.bat
 ```
 
-> En ambos casos, el script `start.bat` instala Python y todas las dependencias automáticamente. Solo necesitas tener **Node.js** instalado previamente (https://nodejs.org).
+> En ambos casos, el script `start.bat` instala Python automáticamente.
+> ⚠️ **Node.js debe estar instalado previamente**: https://nodejs.org/es/download
 
 ### 🌐 URLs de acceso
 
@@ -145,13 +147,14 @@ npm run dev
 
 ### 🛠️ Pré-requisitos
 
-| Ferramenta | Versão mínima | Observações |
-|------------|---------------|-------------|
-| **Python** | 3.10+ | Necessário para o backend |
-| **Node.js** | 18+ | Necessário para o frontend |
-| **npm** | 8+ | Instalado junto com o Node.js |
+| Ferramenta | Versão mínima | Instalado automaticamente? | Observações |
+|------------|---------------|--------------------------|-------------|
+| **Python** | 3.10+ | ✅ Sim (Windows, via UV) | No Linux/macOS deve estar instalado |
+| **Node.js** | 18+ | ❌ Não, manual | Baixar em https://nodejs.org |
+| **npm** | 8+ | ✅ Sim | Incluído com o Node.js |
 
-> **Windows**: O script `start.bat` instala o Python automaticamente via [Astral UV](https://docs.astral.sh/uv/) caso não esteja disponível. Não é necessário instalar o Python manualmente.
+> ⚠️ **Windows**: O script `start.bat` instala o Python automaticamente via [Astral UV](https://docs.astral.sh/uv/), mas o **Node.js deve ser instalado manualmente** antes de executar o script.
+> 👉 Baixe o Node.js LTS aqui: **https://nodejs.org/pt/download**
 
 ### 🚀 Instalação e execução
 
@@ -187,7 +190,8 @@ cd picking
 start.bat
 ```
 
-> Em ambos os casos, o script `start.bat` instala o Python e todas as dependências automaticamente. Você só precisa ter o **Node.js** instalado previamente (https://nodejs.org).
+> Em ambos os casos, o script `start.bat` instala o Python automaticamente.
+> ⚠️ **O Node.js deve estar instalado previamente**: https://nodejs.org/pt/download
 
 ### 🌐 URLs de acesso
 
