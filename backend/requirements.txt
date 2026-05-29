@@ -9,3 +9,4 @@ python-multipart
 openpyxl
 pyxlsb
 fsspec
+a2wsgi
