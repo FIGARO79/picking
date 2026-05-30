@@ -5,7 +5,8 @@ import 'react-toastify/dist/ReactToastify.css';
 
 const Settings = () => {
   const { t, locale } = useTranslation();
-  const [warehouseName, setWarehouseName] = useState('');
+  const [warehouses, setWarehouses] = useState([]);
+  const [newWarehouse, setNewWarehouse] = useState('');
   const [carriers, setCarriers] = useState([]);
   const [newCarrier, setNewCarrier] = useState('');
   const [loading, setLoading] = useState(true);
@@ -21,13 +22,30 @@ const Settings = () => {
       const res = await fetch('/api/config/');
       if (!res.ok) throw new Error('Error al cargar la configuración.');
       const data = await res.json();
-      setWarehouseName(data.warehouse_name || '');
+      setWarehouses(data.warehouses || (data.warehouse_name ? [data.warehouse_name] : []));
       setCarriers(data.carriers || []);
     } catch (err) {
       toast.error(err.message);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleAddWarehouse = (e) => {
+    e.preventDefault();
+    const cleanWarehouse = newWarehouse.trim();
+    if (!cleanWarehouse) return;
+    if (warehouses.includes(cleanWarehouse)) {
+      toast.warning(locale === 'pt' ? 'Este Centro de Distribuição já existe.' : 'Este Centro de Distribución ya existe.');
+      return;
+    }
+    setWarehouses([...warehouses, cleanWarehouse]);
+    setNewWarehouse('');
+  };
+
+  const handleRemoveWarehouse = (index) => {
+    const updated = warehouses.filter((_, idx) => idx !== index);
+    setWarehouses(updated);
   };
 
   const handleAddCarrier = (e) => {
@@ -48,8 +66,8 @@ const Settings = () => {
   };
 
   const handleSaveConfig = async () => {
-    if (!warehouseName.trim()) {
-      toast.warning(locale === 'pt' ? 'O nome da adega é obrigatório.' : 'El nombre de la bodega es requerido.');
+    if (warehouses.length === 0) {
+      toast.warning(locale === 'pt' ? 'Pelo menos um Centro de Distribuição é obrigatório.' : 'Al menos un Centro de Distribución es requerido.');
       return;
     }
 
@@ -61,7 +79,8 @@ const Settings = () => {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          warehouse_name: warehouseName.trim(),
+          warehouse_name: warehouses[0], // Compatibilidad con clientes antiguos
+          warehouses: warehouses,
           carriers: carriers
         })
       });
@@ -168,45 +187,93 @@ const Settings = () => {
           </div>
         </div>
 
-        {/* Columna 2: Nombre de la Bodega */}
+        {/* Columna 2: Centros de Distribución */}
         <div className="card settings-card">
           <div className="card-header-fiori">
-            <h3>🏢 {locale === 'pt' ? 'Dados do Centro de Distribuição' : 'Datos del Centro de Distribución'}</h3>
+            <h3>🏢 {locale === 'pt' ? 'Gestão de Centros de Distribuição' : 'Gestión de Centros de Distribución'}</h3>
             <p className="card-subtitle-fiori">
               {locale === 'pt' 
-                ? 'Configure o nome oficial da adega/CD para a assinatura do auditor.' 
-                : 'Configura el nombre oficial de la bodega/CD para la firma del auditor.'}
+                ? 'Adicione ou remova os centros de distribuição ativos.' 
+                : 'Agrega o elimina los centros de distribución (CEDI) activos.'}
             </p>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1.5rem' }}>
+          <form onSubmit={handleAddWarehouse} className="warehouse-form" style={{ marginTop: '1rem' }}>
             <div className="input-group">
               <label className="form-label" style={{ fontWeight: '600' }}>
-                {locale === 'pt' ? 'Nome da Adega (WMS / CD)' : 'Nombre de la Bodega (WMS / CD)'}
+                {locale === 'pt' ? 'Novo Centro de Distribuição' : 'Nuevo Centro de Distribución'}
               </label>
-              <input
-                type="text"
-                value={warehouseName}
-                onChange={(e) => setWarehouseName(e.target.value)}
-                placeholder="Ej: CD Logix Bogotá - Bodega 3"
-                style={{ width: '100%', height: '36px', padding: '0 0.5rem', border: '1px solid #ccc', borderRadius: '4px', marginTop: '0.25rem' }}
-              />
+              <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.25rem' }}>
+                <input
+                  type="text"
+                  value={newWarehouse}
+                  onChange={(e) => setNewWarehouse(e.target.value)}
+                  placeholder="Ej: CD Logix Bogotá - Bodega 3"
+                  style={{ flex: 1, height: '36px', padding: '0 0.5rem', border: '1px solid #ccc', borderRadius: '4px' }}
+                />
+                <button type="submit" className="btn btn-primary" style={{ height: '36px', padding: '0 1rem', display: 'flex', alignItems: 'center' }}>
+                  ＋ {locale === 'pt' ? 'Adicionar' : 'Agregar'}
+                </button>
+              </div>
             </div>
-            
-            <div style={{ 
-              backgroundColor: '#f0f9ff', 
-              borderLeft: '4px solid var(--primary)', 
-              padding: '0.75rem 1rem', 
-              borderRadius: '4px', 
-              fontSize: '0.8rem', 
-              color: '#1e40af', 
-              marginTop: '1rem',
-              lineHeight: '1.4'
-            }}>
-              ℹ️ {locale === 'pt' 
-                ? 'O nome da adega será impresso diretamente abaixo da linha de assinatura do operador em todas las vias dos volumes e etiquetas de embalagem.' 
-                : 'El nombre de la bodega se imprimirá directamente debajo de la línea de firma del operador en todas las etiquetas de bultos y packing lists.'}
-            </div>
+          </form>
+
+          <div className="warehouses-list-container" style={{ marginTop: '1.5rem' }}>
+            <label className="form-label" style={{ fontWeight: '600', display: 'block', marginBottom: '0.5rem' }}>
+              {locale === 'pt' ? 'Centros de Distribuição Ativos' : 'Centros de Distribución Activos'}
+            </label>
+            {warehouses.length === 0 ? (
+              <div style={{ padding: '1rem', border: '1px dashed #ccc', borderRadius: '4px', textAlign: 'center', color: '#666', fontSize: '0.85rem' }}>
+                {locale === 'pt' ? 'Nenhum centro de distribuição cadastrado.' : 'No hay centros de distribución registrados.'}
+              </div>
+            ) : (
+              <div className="warehouses-list" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '250px', overflowY: 'auto', paddingRight: '0.25rem' }}>
+                {warehouses.map((wh, index) => (
+                  <div key={index} className="warehouse-item" style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    padding: '0.5rem 0.75rem',
+                    backgroundColor: '#f8fafc',
+                    border: '1px solid var(--border-color)',
+                    borderRadius: '4px'
+                  }}>
+                    <span style={{ fontSize: '0.9rem', fontWeight: '500' }}>{wh}</span>
+                    <button 
+                      type="button" 
+                      onClick={() => handleRemoveWarehouse(index)} 
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        color: 'var(--danger)',
+                        cursor: 'pointer',
+                        fontSize: '1rem',
+                        padding: '0 4px',
+                        fontWeight: 'bold'
+                      }}
+                      title={locale === 'pt' ? 'Remover' : 'Eliminar'}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div style={{ 
+            backgroundColor: '#f0f9ff', 
+            borderLeft: '4px solid var(--primary)', 
+            padding: '0.75rem 1rem', 
+            borderRadius: '4px', 
+            fontSize: '0.8rem', 
+            color: '#1e40af', 
+            marginTop: '1.5rem',
+            lineHeight: '1.4'
+          }}>
+            ℹ️ {locale === 'pt' 
+              ? 'O Centro de Distribuição selecionado na impressão será impresso abaixo da linha de assinatura do operador em todas as vias dos volumes.' 
+              : 'El Centro de Distribución seleccionado en la impresión se imprimirá debajo de la línea de firma del operador en todas las etiquetas de bultos.'}
           </div>
         </div>
       </div>
@@ -264,13 +331,16 @@ const Settings = () => {
           line-height: 1.3;
         }
 
-        .carriers-list::-webkit-scrollbar {
+        .carriers-list::-webkit-scrollbar,
+        .warehouses-list::-webkit-scrollbar {
           width: 6px;
         }
-        .carriers-list::-webkit-scrollbar-track {
+        .carriers-list::-webkit-scrollbar-track,
+        .warehouses-list::-webkit-scrollbar-track {
           background: #f1f5f9;
         }
-        .carriers-list::-webkit-scrollbar-thumb {
+        .carriers-list::-webkit-scrollbar-thumb,
+        .warehouses-list::-webkit-scrollbar-thumb {
           background: #cbd5e1;
           border-radius: 4px;
         }

@@ -1,184 +1,21 @@
 INFO:     Will watch for changes in these directories: ['/home/fabio/picking/backend']
 INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
-INFO:     Started reloader process [22220] using WatchFiles
-INFO:     Started server process [22229]
+INFO:     Started reloader process [30743] using WatchFiles
+INFO:     Started server process [30753]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
 /home/fabio/picking/backend/venv/lib/python3.13/site-packages/fastapi/routing.py:328: FastAPIDeprecationWarning: ORJSONResponse is deprecated, FastAPI now serializes data directly to JSON bytes via Pydantic when a return type or response model is set, which is faster and doesn't need a custom response class. Read more in the FastAPI docs: https://fastapi.tiangolo.com/advanced/custom-response/#orjson-or-response-model and https://fastapi.tiangolo.com/tutorial/response-model/
   return await dependant.call(**values)
-Iniciando aplicación de Auditoría de Picking...
-Tablas de base de datos listas.
-INFO:     127.0.0.1:38090 - "GET /api/picking/tracking HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38096 - "GET /api/picking/tracking HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38106 - "GET /api/picking/order/0045614/00 HTTP/1.1" 200 OK
-/home/fabio/picking/backend/venv/lib/python3.13/site-packages/fastapi/routing.py:120: FastAPIDeprecationWarning: ORJSONResponse is deprecated, FastAPI now serializes data directly to JSON bytes via Pydantic when a return type or response model is set, which is faster and doesn't need a custom response class. Read more in the FastAPI docs: https://fastapi.tiangolo.com/advanced/custom-response/#orjson-or-response-model and https://fastapi.tiangolo.com/tutorial/response-model/
-  response = await f(request)
-INFO:     127.0.0.1:34150 - "POST /api/save_picking_audit HTTP/1.1" 201 Created
-INFO:     127.0.0.1:34154 - "GET /api/picking/tracking HTTP/1.1" 200 OK
-INFO:     127.0.0.1:34156 - "GET /api/views/view_picking_audits HTTP/1.1" 200 OK
-INFO:     127.0.0.1:34166 - "GET /api/views/view_picking_audits HTTP/1.1" 200 OK
-INFO:     127.0.0.1:36496 - "GET /api/picking/packing_list/2 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:36508 - "GET /api/picking/packing_list/2 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:35318 - "GET /api/views/view_picking_audits HTTP/1.1" 200 OK
-INFO:     127.0.0.1:35324 - "GET /api/views/view_picking_audits HTTP/1.1" 200 OK
-INFO:     127.0.0.1:45478 - "GET /api/picking/tracking HTTP/1.1" 200 OK
-INFO:     127.0.0.1:45484 - "GET /api/picking/tracking HTTP/1.1" 200 OK
-WARNING:  WatchFiles detected changes in 'app/routers/picking.py'. Reloading...
-INFO:     Shutting down
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [22229]
-INFO:     Started server process [22906]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-WARNING:  WatchFiles detected changes in 'app/routers/shipment.py'. Reloading...
-INFO:     Shutting down
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [22906]
-INFO:     Started server process [22943]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-/home/fabio/picking/backend/venv/lib/python3.13/site-packages/fastapi/routing.py:328: FastAPIDeprecationWarning: ORJSONResponse is deprecated, FastAPI now serializes data directly to JSON bytes via Pydantic when a return type or response model is set, which is faster and doesn't need a custom response class. Read more in the FastAPI docs: https://fastapi.tiangolo.com/advanced/custom-response/#orjson-or-response-model and https://fastapi.tiangolo.com/tutorial/response-model/
-  return await dependant.call(**values)
-Iniciando aplicación de Auditoría de Picking...
-Tablas de base de datos listas.
-INFO:     127.0.0.1:54224 - "GET /api/views/view_picking_audits HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54240 - "GET /api/views/view_picking_audits HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54252 - "GET /api/picking/packing_list/2 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54254 - "GET /api/picking/packing_list/2 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60364 - "GET /api/views/view_picking_audits HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60376 - "GET /api/views/view_picking_audits HTTP/1.1" 200 OK
-INFO:     127.0.0.1:47386 - "GET /api/picking/packing_list/2 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:47400 - "GET /api/picking/packing_list/2 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60460 - "GET /api/views/view_picking_audits HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60476 - "GET /api/views/view_picking_audits HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60498 - "GET /api/picking/tracking HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60510 - "GET /api/picking/tracking HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60528 - "GET /api/picking/order/0045626/00 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:33704 - "GET /api/views/view_picking_audits HTTP/1.1" 200 OK
-INFO:     127.0.0.1:33720 - "GET /api/views/view_picking_audits HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40214 - "GET /api/picking_audit/2 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:43686 - "GET /api/picking_audit/1 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56218 - "GET /api/shipments/ HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56232 - "GET /api/shipments/ HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56248 - "GET /api/picking/tracking HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56262 - "GET /api/picking/tracking HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59764 - "GET /api/views/view_picking_audits HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59780 - "GET /api/views/view_picking_audits HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59792 - "GET /api/picking/packing_list/2 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59804 - "GET /api/picking/packing_list/2 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53382 - "GET /api/views/view_picking_audits HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53398 - "GET /api/views/view_picking_audits HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55338 - "GET /api/picking/tracking HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55344 - "GET /api/picking/tracking HTTP/1.1" 200 OK
-INFO:     127.0.0.1:33634 - "GET /api/picking/order/0045614/00 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:37892 - "GET /api/views/view_picking_audits HTTP/1.1" 200 OK
-INFO:     127.0.0.1:37896 - "GET /api/views/view_picking_audits HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58790 - "GET /api/picking/packing_list/2 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58794 - "GET /api/picking/packing_list/2 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44272 - "GET /api/views/view_picking_audits HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44274 - "GET /api/views/view_picking_audits HTTP/1.1" 200 OK
-INFO:     127.0.0.1:43578 - "GET /api/views/view_picking_audits HTTP/1.1" 200 OK
-INFO:     127.0.0.1:43594 - "GET /api/views/view_picking_audits HTTP/1.1" 200 OK
-INFO:     127.0.0.1:43608 - "GET /api/picking/packing_list/2 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:43614 - "GET /api/picking/packing_list/2 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:46690 - "GET /api/views/view_picking_audits HTTP/1.1" 200 OK
-INFO:     127.0.0.1:46700 - "GET /api/views/view_picking_audits HTTP/1.1" 200 OK
-INFO:     127.0.0.1:34690 - "GET /api/picking/packing_list/2 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:34704 - "GET /api/picking/packing_list/2 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40768 - "GET /api/views/view_picking_audits HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40776 - "GET /api/views/view_picking_audits HTTP/1.1" 200 OK
-INFO:     127.0.0.1:35592 - "GET /api/picking/tracking HTTP/1.1" 200 OK
-INFO:     127.0.0.1:35594 - "GET /api/picking/tracking HTTP/1.1" 200 OK
-INFO:     127.0.0.1:37304 - "GET /api/picking/order/0042545/00 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:45674 - "GET /api/picking/tracking HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52234 - "GET /api/picking/order/0042545/00 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51168 - "GET /api/views/view_picking_audits HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51170 - "GET /api/views/view_picking_audits HTTP/1.1" 200 OK
-INFO:     127.0.0.1:35470 - "GET /api/shipments/ HTTP/1.1" 200 OK
-INFO:     127.0.0.1:35476 - "GET /api/shipments/ HTTP/1.1" 200 OK
-WARNING:  WatchFiles detected changes in 'app/models/schemas.py'. Reloading...
-INFO:     Shutting down
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [22943]
-INFO:     Started server process [25659]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-WARNING:  WatchFiles detected changes in 'app/core/i18n.py'. Reloading...
-INFO:     Shutting down
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [25659]
-INFO:     Started server process [25698]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-WARNING:  WatchFiles detected changes in 'app/routers/shipment.py'. Reloading...
-INFO:     Shutting down
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [25698]
-INFO:     Started server process [25762]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-/home/fabio/picking/backend/venv/lib/python3.13/site-packages/fastapi/routing.py:328: FastAPIDeprecationWarning: ORJSONResponse is deprecated, FastAPI now serializes data directly to JSON bytes via Pydantic when a return type or response model is set, which is faster and doesn't need a custom response class. Read more in the FastAPI docs: https://fastapi.tiangolo.com/advanced/custom-response/#orjson-or-response-model and https://fastapi.tiangolo.com/tutorial/response-model/
-  return await dependant.call(**values)
-Iniciando aplicación de Auditoría de Picking...
-Tablas de base de datos listas.
-INFO:     127.0.0.1:58910 - "GET /api/shipments/ HTTP/1.1" 200 OK
-INFO:     127.0.0.1:46486 - "GET /api/views/view_picking_audits HTTP/1.1" 200 OK
-INFO:     127.0.0.1:46500 - "GET /api/views/view_picking_audits HTTP/1.1" 200 OK
-INFO:     127.0.0.1:46510 - "GET /api/picking/packing_list/2 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:46516 - "GET /api/picking/packing_list/2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51782 - "GET /api/config/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51796 - "GET /api/config/ HTTP/1.1" 200 OK
 WARNING:  WatchFiles detected changes in 'app/routers/config.py'. Reloading...
 INFO:     Shutting down
 INFO:     Waiting for application shutdown.
 INFO:     Application shutdown complete.
-INFO:     Finished server process [25762]
-INFO:     Started server process [27589]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-WARNING:  WatchFiles detected changes in 'main.py'. Reloading...
-INFO:     Shutting down
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [27589]
-INFO:     Started server process [27674]
+INFO:     Finished server process [30753]
+INFO:     Started server process [31775]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
 /home/fabio/picking/backend/venv/lib/python3.13/site-packages/fastapi/routing.py:328: FastAPIDeprecationWarning: ORJSONResponse is deprecated, FastAPI now serializes data directly to JSON bytes via Pydantic when a return type or response model is set, which is faster and doesn't need a custom response class. Read more in the FastAPI docs: https://fastapi.tiangolo.com/advanced/custom-response/#orjson-or-response-model and https://fastapi.tiangolo.com/tutorial/response-model/
   return await dependant.call(**values)
-Iniciando aplicación de Auditoría de Picking...
-Tablas de base de datos listas.
-INFO:     127.0.0.1:37402 - "GET /api/picking/packing_list/2 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:37412 - "GET /api/picking/packing_list/2 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:48564 - "GET /api/views/view_picking_audits HTTP/1.1" 200 OK
-INFO:     127.0.0.1:48570 - "GET /api/views/view_picking_audits HTTP/1.1" 200 OK
-INFO:     127.0.0.1:48580 - "GET /api/config/ HTTP/1.1" 200 OK
-INFO:     127.0.0.1:48592 - "GET /api/config/ HTTP/1.1" 200 OK
-/home/fabio/picking/backend/venv/lib/python3.13/site-packages/fastapi/routing.py:120: FastAPIDeprecationWarning: ORJSONResponse is deprecated, FastAPI now serializes data directly to JSON bytes via Pydantic when a return type or response model is set, which is faster and doesn't need a custom response class. Read more in the FastAPI docs: https://fastapi.tiangolo.com/advanced/custom-response/#orjson-or-response-model and https://fastapi.tiangolo.com/tutorial/response-model/
-  response = await f(request)
-INFO:     127.0.0.1:34252 - "POST /api/config/ HTTP/1.1" 200 OK
-INFO:     127.0.0.1:43866 - "GET /api/views/view_picking_audits HTTP/1.1" 200 OK
-INFO:     127.0.0.1:43882 - "GET /api/views/view_picking_audits HTTP/1.1" 200 OK
-INFO:     127.0.0.1:43896 - "GET /api/config/ HTTP/1.1" 200 OK
-INFO:     127.0.0.1:43894 - "GET /api/picking/packing_list/2 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:43906 - "GET /api/config/ HTTP/1.1" 200 OK
-INFO:     127.0.0.1:43912 - "GET /api/picking/packing_list/2 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57844 - "GET /api/config/ HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57858 - "GET /api/config/ HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57828 - "GET /api/picking/packing_list/2 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57834 - "GET /api/picking/packing_list/2 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51624 - "GET /api/config/ HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51638 - "GET /api/config/ HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51612 - "GET /api/picking/packing_list/2 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51634 - "GET /api/picking/packing_list/2 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:34456 - "GET /api/config/ HTTP/1.1" 200 OK
-INFO:     127.0.0.1:34486 - "GET /api/config/ HTTP/1.1" 200 OK
-INFO:     127.0.0.1:34452 - "GET /api/picking/packing_list/2 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:34472 - "GET /api/picking/packing_list/2 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55330 - "GET /api/views/view_picking_audits HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55336 - "GET /api/views/view_picking_audits HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60138 - "GET /api/config/ HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60146 - "GET /api/config/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40036 - "GET /api/config/ HTTP/1.1" 200 OK

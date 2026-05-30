@@ -14,7 +14,8 @@ const PackingListPrint = () => {
   const [error, setError] = useState(null);
 
   // Estados de Configuración de Bodega y Transportadoras
-  const [warehouseName, setWarehouseName] = useState('');
+  const [warehousesList, setWarehousesList] = useState([]);
+  const [selectedWarehouse, setSelectedWarehouse] = useState('');
   const [carriersList, setCarriersList] = useState([]);
   const [selectedCarrier, setSelectedCarrier] = useState('');
 
@@ -28,7 +29,9 @@ const PackingListPrint = () => {
       const res = await fetch('/api/config/');
       if (res.ok) {
         const configData = await res.json();
-        setWarehouseName(configData.warehouse_name || '');
+        const list = configData.warehouses || (configData.warehouse_name ? [configData.warehouse_name] : []);
+        setWarehousesList(list);
+        setSelectedWarehouse(list[0] || '');
         setCarriersList(configData.carriers || []);
       }
     } catch (e) {
@@ -83,14 +86,39 @@ const PackingListPrint = () => {
         <div className="control-inner">
           <div className="control-info">
             <h2>{isConsolidated ? `${t('printTitleConsolidated')} #${id}` : t('printTitle')}</h2>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '2px' }}>
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{t('tableHeaderCarrier')}:</span>
-              {isConsolidated ? (
-                <strong style={{ fontSize: '0.75rem' }}>{data.carrier || 'No asignado'}</strong>
-              ) : (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '2px', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{t('tableHeaderCarrier')}:</span>
+                {isConsolidated ? (
+                  <strong style={{ fontSize: '0.75rem' }}>{data.carrier || 'No asignado'}</strong>
+                ) : (
+                  <select
+                    value={selectedCarrier}
+                    onChange={(e) => setSelectedCarrier(e.target.value)}
+                    style={{
+                      height: '28px',
+                      padding: '0 0.5rem',
+                      borderRadius: '4px',
+                      border: '1px solid var(--border-color)',
+                      fontSize: '0.8rem',
+                      color: '#333',
+                      backgroundColor: 'white',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <option value="">{locale === 'pt' ? 'Nenhuma (Direto)' : 'Ninguna (Directo)'}</option>
+                    {carriersList.map((c, idx) => (
+                      <option key={idx} value={c}>{c}</option>
+                    ))}
+                  </select>
+                )}
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{locale === 'pt' ? 'CEDI' : 'Centro de Distribución'}:</span>
                 <select
-                  value={selectedCarrier}
-                  onChange={(e) => setSelectedCarrier(e.target.value)}
+                  value={selectedWarehouse}
+                  onChange={(e) => setSelectedWarehouse(e.target.value)}
                   style={{
                     height: '28px',
                     padding: '0 0.5rem',
@@ -102,12 +130,12 @@ const PackingListPrint = () => {
                     cursor: 'pointer'
                   }}
                 >
-                  <option value="">{locale === 'pt' ? 'Nenhuma (Direto)' : 'Ninguna (Directo)'}</option>
-                  {carriersList.map((c, idx) => (
-                    <option key={idx} value={c}>{c}</option>
+                  <option value="">{locale === 'pt' ? 'Nenhum' : 'Ninguno'}</option>
+                  {warehousesList.map((w, idx) => (
+                    <option key={idx} value={w}>{w}</option>
                   ))}
                 </select>
-              )}
+              </div>
             </div>
           </div>
           <div className="control-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -229,9 +257,9 @@ const PackingListPrint = () => {
                   <div className="signature-area" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px' }}>
                     <span className="signature-line"></span>
                     <span className="signature-lbl">{locale === 'pt' ? 'Assinatura do Auditor' : 'Firma del Auditor'}</span>
-                    {warehouseName && (
+                    {selectedWarehouse && (
                       <span className="warehouse-lbl" style={{ fontSize: '0.7rem', color: '#111', fontWeight: 'bold', marginTop: '2px', textTransform: 'uppercase' }}>
-                        {warehouseName}
+                        {selectedWarehouse}
                       </span>
                     )}
                   </div>
