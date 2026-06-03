@@ -113,3 +113,27 @@ INFO:     127.0.0.1:48132 - "GET /api/views/view_picking_audits HTTP/1.1" 200 OK
 INFO:     127.0.0.1:48148 - "GET /api/views/view_picking_audits HTTP/1.1" 200 OK
 INFO:     127.0.0.1:36526 - "GET /api/config/ HTTP/1.1" 200 OK
 INFO:     127.0.0.1:36532 - "GET /api/config/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58268 - "GET /api/picking/tracking HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58270 - "GET /api/picking/tracking HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36522 - "GET /api/views/view_picking_audits HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36528 - "GET /api/views/view_picking_audits HTTP/1.1" 200 OK
+WARNING:  WatchFiles detected changes in 'delete_audit.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [6203]
+INFO:     Started server process [14068]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+/home/fabio/picking/backend/venv/lib/python3.13/site-packages/fastapi/routing.py:328: FastAPIDeprecationWarning: ORJSONResponse is deprecated, FastAPI now serializes data directly to JSON bytes via Pydantic when a return type or response model is set, which is faster and doesn't need a custom response class. Read more in the FastAPI docs: https://fastapi.tiangolo.com/advanced/custom-response/#orjson-or-response-model and https://fastapi.tiangolo.com/tutorial/response-model/
+  return await dependant.call(**values)
+INFO:     127.0.0.1:41538 - "GET /api/shipments/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41552 - "GET /api/shipments/ HTTP/1.1" 200 OK
+WARNING:  WatchFiles detected changes in 'delete_audit.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [14068]
+INFO:     Started server process [15424]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
