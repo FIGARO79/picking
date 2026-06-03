@@ -121,12 +121,12 @@ const Shipments = () => {
           <table>
             <thead>
               <tr className="bg-zinc-900 text-white">
-                <th style={{ width: '40px' }}></th>
-                <th>{t('tableHeaderShipment')}</th>
-                <th>{t('tableHeaderDate')}</th>
-                <th>{t('tableHeaderCustomer')}</th>
-                <th>{t('tableHeaderAuditor')}</th>
-                <th>{t('tableHeaderCarrier')}</th>
+                <th className="text-center" style={{ width: '40px' }}></th>
+                <th className="text-center">{t('tableHeaderShipment')}</th>
+                <th className="text-center">{t('tableHeaderDate')}</th>
+                <th className="text-center" style={{ minWidth: '250px' }}>{t('tableHeaderCustomer')}</th>
+                <th className="text-center">{t('tableHeaderAuditor')}</th>
+                <th className="text-center">{t('tableHeaderCarrier')}</th>
                 <th className="text-center">{t('tableHeaderOrdersCount')}</th>
                 <th className="text-center">{t('tableHeaderStatus')}</th>
                 <th className="text-center">{t('tableHeaderActions')}</th>
@@ -146,9 +146,9 @@ const Shipments = () => {
                       <td className="text-center">
                         <span className="expand-arrow">{isExpanded ? '▼' : '▶'}</span>
                       </td>
-                      <td className="text-mono">#{s.id}</td>
-                      <td className="text-mono text-xs text-muted">{formatDate(s.created_at)}</td>
-                      <td className="truncate-cell" style={{ maxWidth: '220px' }}>
+                      <td className="text-center text-mono">#{s.id}</td>
+                      <td className="text-center text-mono text-xs text-muted">{formatDate(s.created_at)}</td>
+                      <td className="truncate-cell" style={{ maxWidth: '300px' }}>
                         {s.audits.length > 0 && (
                           <>
                             <span className="text-muted">[{s.audits[0].customer_code}]</span> {s.audits[0].customer_name}
@@ -158,8 +158,8 @@ const Shipments = () => {
                           </>
                         )}
                       </td>
-                      <td className="profile-cell">{s.username}</td>
-                      <td><strong>{s.carrier || '—'}</strong></td>
+                      <td className="text-center profile-cell">{s.username}</td>
+                      <td className="text-center"><strong>{s.carrier || '—'}</strong></td>
                       <td className="text-center font-medium">
                         <span className="orders-count-badge">{s.total_orders}</span>
                       </td>
@@ -318,6 +318,16 @@ const Shipments = () => {
         .shipments-table-container {
           border: 1px solid var(--border-color);
           border-radius: var(--radius-md);
+        }
+
+        .text-center {
+          text-align: center;
+        }
+
+        .truncate-cell {
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
 
         .row-expanded {

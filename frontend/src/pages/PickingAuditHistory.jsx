@@ -144,7 +144,7 @@ const PickingAuditHistory = () => {
         despatch_number: editingAudit.despatch_number,
         customer_code: editingAudit.customer_code || '',
         customer_name: editingAudit.customer_name || 'N/A',
-        status: editingAudit.status,
+        status: editingAudit.status || 'Completo',
         username: localStorage.getItem('auditor_name') || 'Auditor',
         items: editingAudit.items.map(i => ({
           code: i.item_code,
@@ -250,13 +250,13 @@ const PickingAuditHistory = () => {
             <thead>
               <tr className="bg-zinc-50 border-b border-zinc-200">
                 <th className="text-center" style={{ width: '50px' }}>{t('tableHeaderShipment')}</th>
-                <th style={{ width: '40px' }}></th>
-                <th>{t('tableHeaderId')}</th>
-                <th>{t('tableHeaderOrder')}</th>
-                <th>{t('tableHeaderDespatch')}</th>
-                <th>{t('tableHeaderCustomer')}</th>
-                <th>{t('tableHeaderAuditor')}</th>
-                <th>{t('tableHeaderDate')}</th>
+                <th className="text-center" style={{ width: '40px' }}></th>
+                <th className="text-center">{t('tableHeaderId')}</th>
+                <th className="text-center">{t('tableHeaderOrder')}</th>
+                <th className="text-center" style={{ width: '80px' }}>{t('tableHeaderDespatch')}</th>
+                <th className="text-center" style={{ minWidth: '250px' }}>{t('tableHeaderCustomer')}</th>
+                <th className="text-center">{t('tableHeaderAuditor')}</th>
+                <th className="text-center">{t('tableHeaderDate')}</th>
                 <th className="text-center">{t('tableHeaderStatus')}</th>
                 <th className="text-center">{t('tableHeaderActions')}</th>
               </tr>
@@ -283,14 +283,14 @@ const PickingAuditHistory = () => {
                       <td className="text-center">
                         <span className="expand-arrow">{isExpanded ? '▼' : '▶'}</span>
                       </td>
-                      <td className="text-mono">#{audit.id}</td>
-                      <td><strong>{audit.order_number}</strong></td>
-                      <td className="text-mono">{audit.despatch_number}</td>
-                      <td className="truncate-cell" style={{ maxWidth: '200px' }}>
+                      <td className="text-center text-mono">#{audit.id}</td>
+                      <td className="text-center"><strong>{audit.order_number}</strong></td>
+                      <td className="text-center text-mono">{audit.despatch_number}</td>
+                      <td className="truncate-cell" style={{ maxWidth: '300px' }}>
                         <span className="text-muted">[{audit.customer_code}]</span> {audit.customer_name}
                       </td>
-                      <td className="profile-cell">{audit.username}</td>
-                      <td className="text-mono text-xs text-muted">{formatDate(audit.timestamp)}</td>
+                      <td className="profile-cell text-center">{audit.username}</td>
+                      <td className="text-center text-mono text-xs text-muted">{formatDate(audit.timestamp)}</td>
                       <td className="text-center">
                         <span className={`badge ${
                           audit.status === 'Completo' || audit.status === 'Completado' 
@@ -528,6 +528,16 @@ const PickingAuditHistory = () => {
           border: 1px solid var(--border-color);
           border-radius: var(--radius-md);
           overflow: visible;
+        }
+
+        .text-center {
+          text-align: center;
+        }
+
+        .truncate-cell {
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
 
         .row-expanded {

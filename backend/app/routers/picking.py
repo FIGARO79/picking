@@ -351,6 +351,7 @@ async def get_picking_audit(
             "despatch_number": audit.despatch_number,
             "customer_code": audit.customer_code,
             "customer_name": audit.customer_name,
+            "status": audit.status,
             "packages": audit.packages or 0,
             "packages_assignment": packages_assignment,
             "packages_dimensions": packages_dimensions,

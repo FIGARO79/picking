@@ -596,7 +596,7 @@ const PickingAudit = () => {
                 </tr>
               </thead>
               <tbody>
-                {orderItems.map((item, idx) => {
+                {orderItems.filter(item => item.qty_scan > 0).map((item, idx) => {
                   const itemKey = `${item.code}:${item.order_line || ''}`;
                   const diff = item.qty_scan - item.qty_req;
                   const isOk = item.qty_scan === item.qty_req;

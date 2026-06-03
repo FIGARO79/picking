@@ -42,7 +42,7 @@ const PackingListPrint = () => {
   const fetchPackingListData = async () => {
     setLoading(true);
     try {
-      const url = isConsolidated 
+      const url = isConsolidated
         ? `/api/shipments/${id}/packing_list`
         : `/api/picking/packing_list/${id}`;
 
@@ -166,7 +166,7 @@ const PackingListPrint = () => {
 
           return sortedKeys.map((pkgNum, pkgIdx) => {
             const items = packages[pkgNum] || [];
-            
+
             // Determinar si debemos forzar salto de página tras este bulto
             const isLastOfAll = orderIdx === orders.length - 1 && pkgIdx === sortedKeys.length - 1;
             const style = isLastOfAll ? {} : { pageBreakAfter: 'always' };
@@ -221,7 +221,6 @@ const PackingListPrint = () => {
                           </span>
                         )}
                       </div>
-                      <span className="pkg-tag-badge">BOX-{pkgNum.padStart(3, '0')}</span>
                     </div>
                   );
                 })()}
@@ -264,10 +263,7 @@ const PackingListPrint = () => {
                     )}
                   </div>
 
-                  <div className="print-app-tag">
-                    <span>SISTEMA LOGIX - WMS</span>
-                    <p>{locale === 'pt' ? 'Auditoria de picking e verificação de embalagem aprovada.' : 'Auditoría de picking y verificación de empaque aprobada.'}</p>
-                  </div>
+
                 </div>
               </div>
             );
@@ -341,40 +337,42 @@ const PackingListPrint = () => {
           background-color: white;
           border: 1px solid #ccc;
           border-radius: var(--radius-sm);
-          padding: 3rem;
+          padding: 1.5rem 2rem;
           box-shadow: var(--shadow-md);
-          margin-bottom: 2rem;
+          margin-bottom: 1.5rem;
           display: flex;
           flex-direction: column;
-          min-height: 297mm; /* Proporción A4 */
+          min-height: auto;
         }
 
         .print-header {
           border-bottom: 2px solid #000;
-          padding-bottom: 1rem;
-          margin-bottom: 1.5rem;
+          padding-bottom: 0.4rem;
+          margin-bottom: 0.75rem;
         }
 
         .header-top {
           display: flex;
           justify-content: space-between;
           align-items: flex-end;
-          margin-bottom: 0.25rem;
+          margin-bottom: 0px;
         }
 
         .header-top h1 {
-          font-size: 1.5rem;
+          font-size: 1.1rem;
           font-weight: 700;
           letter-spacing: 0.05em;
           color: #000;
+          margin: 0;
+          line-height: 1.1;
         }
 
         .header-page-number {
-          font-size: 0.85rem;
+          font-size: 0.75rem;
           font-weight: 700;
           color: #000;
           border: 1px solid #000;
-          padding: 0.15rem 0.5rem;
+          padding: 0.1rem 0.4rem;
           border-radius: 4px;
         }
 
@@ -382,12 +380,12 @@ const PackingListPrint = () => {
           display: flex;
           align-items: baseline;
           gap: 0.4rem;
-          margin-top: 0.2rem;
-          margin-bottom: 0.15rem;
+          margin-top: 0px;
+          margin-bottom: 0.1rem;
         }
 
         .header-carrier-lbl {
-          font-size: 0.7rem;
+          font-size: 0.65rem;
           font-weight: 700;
           text-transform: uppercase;
           letter-spacing: 0.04em;
@@ -395,7 +393,7 @@ const PackingListPrint = () => {
         }
 
         .header-carrier-val {
-          font-size: 0.85rem;
+          font-size: 0.8rem;
           font-weight: 700;
           color: #000;
           text-transform: uppercase;
@@ -404,27 +402,27 @@ const PackingListPrint = () => {
         .header-meta {
           display: flex;
           justify-content: space-between;
-          font-size: 0.7rem;
+          font-size: 0.65rem;
           color: #555;
         }
 
         .print-meta-grid {
           display: grid;
           grid-template-columns: 1fr 1fr;
-          gap: 1.5rem;
-          margin-bottom: 2rem;
+          gap: 1rem;
+          margin-bottom: 1rem;
           border-bottom: 1px solid #ddd;
-          padding-bottom: 1rem;
+          padding-bottom: 0.5rem;
         }
 
         .meta-block {
           display: flex;
           flex-direction: column;
-          gap: 0.25rem;
+          gap: 0.15rem;
         }
 
         .meta-lbl {
-          font-size: 0.65rem;
+          font-size: 0.6rem;
           text-transform: uppercase;
           letter-spacing: 0.05em;
           color: #666;
@@ -432,7 +430,7 @@ const PackingListPrint = () => {
         }
 
         .meta-val {
-          font-size: 0.95rem;
+          font-size: 0.85rem;
           font-weight: 700;
           color: #000;
         }
@@ -443,9 +441,9 @@ const PackingListPrint = () => {
           align-items: center;
           background-color: #f8fafc;
           border: 1px solid #ddd;
-          padding: 1rem;
+          padding: 0.35rem 0.6rem;
           border-radius: var(--radius-sm);
-          margin-bottom: 1.5rem;
+          margin-bottom: 0.5rem;
         }
 
         .pkg-title-group {
@@ -454,44 +452,44 @@ const PackingListPrint = () => {
         }
 
         .pkg-title-group h3 {
-          font-size: 1.2rem;
+          font-size: 1.05rem;
           font-weight: 700;
           color: #000;
         }
 
         .pkg-total-lbl {
-          font-size: 0.75rem;
+          font-size: 0.7rem;
           color: #555;
         }
 
         .pkg-tag-badge {
           font-family: var(--font-mono);
-          font-size: 0.9rem;
+          font-size: 0.8rem;
           font-weight: 700;
-          border: 2px solid #000;
-          padding: 0.25rem 0.75rem;
+          border: 1.5px solid #000;
+          padding: 0.15rem 0.5rem;
           border-radius: var(--radius-sm);
         }
 
         .print-items-table {
           width: 100%;
           border-collapse: collapse;
-          margin-bottom: 3rem;
+          margin-bottom: 1.5rem;
         }
 
         .print-items-table th {
           background-color: transparent !important;
           color: #000;
           border-bottom: 1.5px solid #000;
-          padding: 0.5rem 0;
-          font-size: 0.75rem;
+          padding: 0.4rem 0;
+          font-size: 0.7rem;
           font-weight: 700;
         }
 
         .print-items-table td {
-          padding: 0.65rem 0;
+          padding: 0.35rem 0;
           border-bottom: 1px solid #eee;
-          font-size: 0.85rem;
+          font-size: 0.8rem;
         }
 
         .print-items-table tr:last-child td {
@@ -504,7 +502,7 @@ const PackingListPrint = () => {
           justify-content: space-between;
           align-items: flex-end;
           border-top: 1px solid #ddd;
-          padding-top: 2rem;
+          padding-top: 1rem;
           gap: 1rem;
         }
 
@@ -517,12 +515,12 @@ const PackingListPrint = () => {
         }
 
         .signature-line {
-          width: 160px;
+          width: 140px;
           border-bottom: 1px solid #000;
         }
 
         .signature-lbl {
-          font-size: 0.7rem;
+          font-size: 0.65rem;
           text-transform: uppercase;
           letter-spacing: 0.05em;
           color: #666;
@@ -538,7 +536,7 @@ const PackingListPrint = () => {
         }
 
         .carrier-footer-lbl {
-          font-size: 0.7rem;
+          font-size: 0.65rem;
           text-transform: uppercase;
           letter-spacing: 0.05em;
           color: #666;
@@ -546,7 +544,7 @@ const PackingListPrint = () => {
         }
 
         .carrier-footer-val {
-          font-size: 0.9rem;
+          font-size: 0.8rem;
           font-weight: 700;
           color: #000;
           text-transform: uppercase;
@@ -558,13 +556,13 @@ const PackingListPrint = () => {
         }
 
         .print-app-tag span {
-          font-size: 0.75rem;
+          font-size: 0.7rem;
           font-weight: 700;
           letter-spacing: 0.05em;
         }
 
         .print-app-tag p {
-          font-size: 0.65rem;
+          font-size: 0.6rem;
           color: #666;
         }
 
@@ -593,7 +591,7 @@ const PackingListPrint = () => {
           .print-page {
             border: none !important;
             box-shadow: none !important;
-            padding: 15mm 20mm !important; /* Mantiene márgenes profesionales para el contenido dentro de la hoja */
+            padding: 8mm 12mm !important; /* Margen compactado para el contenido dentro de la hoja */
             margin: 0 !important;
             min-height: 0 !important;
             page-break-after: always;
