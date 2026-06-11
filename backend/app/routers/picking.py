@@ -4,7 +4,7 @@ import shutil
 import polars as pl
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Header
-from fastapi.responses import ORJSONResponse
+from fastapi.responses import ORJSONResponse, StreamingResponse
 from sqlalchemy import select, and_, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -238,6 +238,168 @@ async def view_picking_audits(db: AsyncSession = Depends(get_db)):
         return ORJSONResponse(content=response)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/export/picking_audits")
+async def export_picking_audits(db: AsyncSession = Depends(get_db), accept_language: str = Header("es")):
+    """Exporta el historial de auditorías con sus ítems detallados a un archivo Excel (.xlsx), adaptando el idioma al actual del usuario."""
+    try:
+        from io import BytesIO
+        from openpyxl import Workbook
+        from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
+        
+        # Detectar idioma portugués
+        is_pt = accept_language.lower().startswith("pt")
+        
+        sheet_title = "Histórico de Picking" if is_pt else "Historial de Picking"
+        filename_prefix = "relatorio_historico_picking" if is_pt else "reporte_historico_picking"
+        
+        headers = [
+            "ID Auditoria", "Número do Pedido", "Número de Despacho", 
+            "Código do Cliente", "Nome do Cliente", "Auditor", 
+            "Data e Hora", "Status", "Total de Volumes",
+            "Linha do Pedido", "Código do Item", "Descrição do Item", 
+            "Qtd. Requisitada", "Qtd. Lida", "Diferença"
+        ] if is_pt else [
+            "ID Auditoría", "Número de Orden", "Número de Despacho", 
+            "Código de Cliente", "Nombre de Cliente", "Auditor", 
+            "Fecha y Hora", "Estado", "Total Bultos",
+            "Línea de Orden", "Código de Artículo", "Descripción del Artículo", 
+            "Cant. Requerida", "Cant. Escaneada", "Diferencia"
+        ]
+        
+        # Consultar todas las auditorías con sus ítems
+        result = await db.execute(
+            select(PickingAuditModel)
+            .options(selectinload(PickingAuditModel.items))
+            .order_by(PickingAuditModel.id.desc())
+        )
+        audits = result.scalars().unique().all()
+        
+        wb = Workbook()
+        ws = wb.active
+        ws.title = sheet_title
+        ws.views.sheetView[0].showGridLines = True
+        
+        # Configurar estilos premium (Belize Blue SAP Fiori)
+        font_header = Font(name="Calibri", size=11, bold=True, color="FFFFFF")
+        font_data = Font(name="Calibri", size=11)
+        
+        fill_header = PatternFill(start_color="285F94", end_color="285F94", fill_type="solid") # Belize Blue
+        fill_zebra = PatternFill(start_color="F8FAFC", end_color="F8FAFC", fill_type="solid")
+        
+        align_left = Alignment(horizontal="left", vertical="center")
+        align_center = Alignment(horizontal="center", vertical="center")
+        
+        thin_side = Side(border_style="thin", color="D9D9D9")
+        border_all = Border(left=thin_side, right=thin_side, top=thin_side, bottom=thin_side)
+        
+        ws.append(headers)
+        for col_idx, h in enumerate(headers, 1):
+            cell = ws.cell(row=1, column=col_idx)
+            cell.font = font_header
+            cell.fill = fill_header
+            cell.alignment = align_center
+            cell.border = border_all
+            
+        row_num = 2
+        for audit in audits:
+            # Limpiar timestamp
+            ts_str = audit.timestamp
+            if ts_str and "T" in ts_str:
+                ts_str = ts_str.replace("T", " ")
+                
+            # Si tiene ítems, agregar una fila por cada ítem
+            if audit.items:
+                for item in audit.items:
+                    row_data = [
+                        audit.id,
+                        audit.order_number,
+                        audit.despatch_number,
+                        audit.customer_code or "",
+                        audit.customer_name or "N/A",
+                        audit.username,
+                        ts_str,
+                        audit.status,
+                        audit.packages or 0,
+                        item.order_line or "",
+                        item.item_code,
+                        item.description or "",
+                        item.qty_req,
+                        item.qty_scan,
+                        item.difference
+                    ]
+                    ws.append(row_data)
+                    
+                    is_even = (row_num % 2 == 0)
+                    for col_idx in range(1, len(headers) + 1):
+                        cell = ws.cell(row=row_num, column=col_idx)
+                        cell.font = font_data
+                        cell.border = border_all
+                        if is_even:
+                            cell.fill = fill_zebra
+                        
+                        # Alineación
+                        if col_idx in [1, 6, 7, 8, 9, 10, 13, 14, 15]:
+                            cell.alignment = align_center
+                        elif col_idx in [2, 3, 4, 11]:
+                            cell.alignment = align_left
+                        else:
+                            cell.alignment = align_left
+                    row_num += 1
+            else:
+                # Fila en blanco si no tiene ítems (fallback)
+                row_data = [
+                    audit.id,
+                    audit.order_number,
+                    audit.despatch_number,
+                    audit.customer_code or "",
+                    audit.customer_name or "N/A",
+                    audit.username,
+                    ts_str,
+                    audit.status,
+                    audit.packages or 0,
+                    "", "", "", 0, 0, 0
+                ]
+                ws.append(row_data)
+                
+                is_even = (row_num % 2 == 0)
+                for col_idx in range(1, len(headers) + 1):
+                    cell = ws.cell(row=row_num, column=col_idx)
+                    cell.font = font_data
+                    cell.border = border_all
+                    if is_even:
+                        cell.fill = fill_zebra
+                    
+                    if col_idx in [1, 6, 7, 8, 9, 10, 13, 14, 15]:
+                        cell.alignment = align_center
+                    elif col_idx in [2, 3, 4, 11]:
+                        cell.alignment = align_left
+                    else:
+                        cell.alignment = align_left
+                row_num += 1
+            
+        # Ajustar ancho de columnas
+        for col in ws.columns:
+            max_len = max(len(str(cell.value or '')) for cell in col)
+            col_letter = col[0].column_letter
+            ws.column_dimensions[col_letter].width = max(max_len + 3, 12)
+            
+        # Guardar en memoria
+        file_stream = BytesIO()
+        wb.save(file_stream)
+        file_stream.seek(0)
+        
+        filename = f"{filename_prefix}_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+        
+        return StreamingResponse(
+            file_stream,
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            headers={
+                "Content-Disposition": f"attachment; filename={filename}"
+            }
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al generar Excel: {str(e)}")
 
 @router.get("/picking/packing_list/{audit_id}")
 async def get_packing_list_data(

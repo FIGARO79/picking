@@ -3,7 +3,7 @@
 # Script de inicio rápido concurrente para la aplicación de Auditoría de Picking
 set -e
 
-PROJECT_ROOT="/home/fabio/picking"
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BACKEND_DIR="$PROJECT_ROOT/backend"
 FRONTEND_DIR="$PROJECT_ROOT/frontend"
 

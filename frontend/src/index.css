@@ -106,7 +106,7 @@ button, input, select, textarea {
 
 .main-content {
   flex-grow: 1;
-  padding: 2rem;
+  padding: 1rem 2rem 2rem 2rem;
   overflow-y: auto;
   max-width: 1400px;
   margin: 0 auto;
@@ -115,7 +115,7 @@ button, input, select, textarea {
 
 @media (max-width: 768px) {
   .main-content {
-    padding: 1rem;
+    padding: 0.5rem 1rem 1rem 1rem;
   }
 }
 

@@ -21,6 +21,44 @@ const PickingAuditHistory = () => {
   const [shipmentCarrier, setShipmentCarrier] = useState('');
   const [shipmentNote, setShipmentNote] = useState('');
   const [creatingShipment, setCreatingShipment] = useState(false);
+  const [exporting, setExporting] = useState(false);
+
+  const handleExportExcel = async () => {
+    setExporting(true);
+    try {
+      const res = await fetch('/api/export/picking_audits', {
+        headers: {
+          'Accept-Language': locale
+        }
+      });
+      if (!res.ok) throw new Error('Error al exportar a Excel.');
+      
+      const blob = await res.blob();
+      let filename = `reporte_historico_picking_${new Date().toISOString().slice(0, 10)}.xlsx`;
+      const disposition = res.headers.get('content-disposition');
+      if (disposition && disposition.indexOf('attachment') !== -1) {
+        const filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+        const matches = filenameRegex.exec(disposition);
+        if (matches != null && matches[1]) { 
+          filename = matches[1].replace(/['"]/g, '');
+        }
+      }
+      
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+      toast.success(locale === 'pt' ? 'Exportado com sucesso!' : '¡Exportado con éxito!');
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setExporting(false);
+    }
+  };
 
   const navigate = useNavigate();
 
@@ -245,7 +283,18 @@ const PickingAuditHistory = () => {
           <p>{t('emptyHistoryDesc')}</p>
         </div>
       ) : (
-        <div className="table-container history-table-container">
+        <>
+          <div className="history-toolbar no-print">
+            <span className="history-subtitle">{t('historyMainSubtitle')}</span>
+            <button 
+              onClick={handleExportExcel} 
+              className="btn btn-secondary btn-export-excel"
+              disabled={exporting}
+            >
+              📊 {exporting ? t('editModalSaving') : t('exportExcelBtn')}
+            </button>
+          </div>
+          <div className="table-container history-table-container">
           <table>
             <thead>
               <tr className="bg-zinc-50 border-b border-zinc-200">
@@ -364,6 +413,7 @@ const PickingAuditHistory = () => {
             </tbody>
           </table>
         </div>
+      </>
       )}
 
       {/* Barra Inferior Flotante de Selección */}
@@ -522,6 +572,35 @@ const PickingAuditHistory = () => {
         .history-container {
           display: flex;
           flex-direction: column;
+        }
+
+        .history-toolbar {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 1.25rem;
+          gap: 1.5rem;
+          flex-wrap: wrap;
+        }
+
+        .history-subtitle {
+          font-size: 0.85rem;
+          color: var(--text-muted);
+          margin: 0;
+        }
+
+        .btn-export-excel {
+          border-color: #107e3e !important;
+          color: #107e3e !important;
+          background-color: transparent !important;
+          font-weight: 600;
+          height: 36px;
+        }
+
+        .btn-export-excel:hover:not(:disabled) {
+          background-color: rgba(16, 126, 62, 0.05) !important;
+          border-color: #0d6b34 !important;
+          color: #0d6b34 !important;
         }
 
         .history-table-container {

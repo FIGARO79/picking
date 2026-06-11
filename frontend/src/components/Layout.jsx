@@ -112,10 +112,6 @@ const Layout = ({ children, title }) => {
             <h1>{getTranslatedTitle(title)}</h1>
             <p className="page-subtitle">LOGIX - SISTEMA DE CONTROL DE EMPAQUE</p>
           </div>
-          <div className="header-status">
-            <span className="status-indicator online"></span>
-            <span className="status-text">SISTEMA ONLINE</span>
-          </div>
         </header>
 
         <div className="page-body">
@@ -328,33 +324,7 @@ const Layout = ({ children, title }) => {
           margin-top: 0.15rem;
         }
 
-        .header-status {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          background-color: #f8fafc;
-          border: 1px solid var(--border-color);
-          padding: 0.35rem 0.75rem;
-          border-radius: var(--radius-full);
-        }
 
-        .status-indicator {
-          width: 8px;
-          height: 8px;
-          border-radius: 50%;
-        }
-
-        .status-indicator.online {
-          background-color: var(--success);
-          box-shadow: 0 0 8px var(--success);
-        }
-
-        .status-text {
-          font-size: 0.65rem;
-          font-weight: 700;
-          letter-spacing: 0.05em;
-          color: var(--text-muted);
-        }
 
         @media (max-width: 768px) {
           .app-container {
