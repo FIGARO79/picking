@@ -4,7 +4,7 @@ import shutil
 import polars as pl
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Header
-from fastapi.responses import ORJSONResponse, StreamingResponse
+from fastapi.responses import ORJSONResponse
 from sqlalchemy import select, and_, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -293,13 +293,18 @@ async def export_picking_audits(db: AsyncSession = Depends(get_db), accept_langu
         thin_side = Side(border_style="thin", color="D9D9D9")
         border_all = Border(left=thin_side, right=thin_side, top=thin_side, bottom=thin_side)
         
-        ws.append(headers)
+        from openpyxl.utils import get_column_letter
+
+        # Diccionario para trackear anchos de columnas
+        col_widths = {}
+
         for col_idx, h in enumerate(headers, 1):
-            cell = ws.cell(row=1, column=col_idx)
+            cell = ws.cell(row=1, column=col_idx, value=h)
             cell.font = font_header
             cell.fill = fill_header
             cell.alignment = align_center
             cell.border = border_all
+            col_widths[col_idx] = len(str(h or ''))
             
         row_num = 2
         for audit in audits:
@@ -328,11 +333,10 @@ async def export_picking_audits(db: AsyncSession = Depends(get_db), accept_langu
                         item.qty_scan,
                         item.difference
                     ]
-                    ws.append(row_data)
                     
                     is_even = (row_num % 2 == 0)
-                    for col_idx in range(1, len(headers) + 1):
-                        cell = ws.cell(row=row_num, column=col_idx)
+                    for col_idx, val in enumerate(row_data, 1):
+                        cell = ws.cell(row=row_num, column=col_idx, value=val)
                         cell.font = font_data
                         cell.border = border_all
                         if is_even:
@@ -345,6 +349,11 @@ async def export_picking_audits(db: AsyncSession = Depends(get_db), accept_langu
                             cell.alignment = align_left
                         else:
                             cell.alignment = align_left
+
+                        # Actualizar ancho de columna
+                        val_str = str(val or '')
+                        if len(val_str) > col_widths[col_idx]:
+                            col_widths[col_idx] = len(val_str)
                     row_num += 1
             else:
                 # Fila en blanco si no tiene ítems (fallback)
@@ -360,11 +369,10 @@ async def export_picking_audits(db: AsyncSession = Depends(get_db), accept_langu
                     audit.packages or 0,
                     "", "", "", 0, 0, 0
                 ]
-                ws.append(row_data)
                 
                 is_even = (row_num % 2 == 0)
-                for col_idx in range(1, len(headers) + 1):
-                    cell = ws.cell(row=row_num, column=col_idx)
+                for col_idx, val in enumerate(row_data, 1):
+                    cell = ws.cell(row=row_num, column=col_idx, value=val)
                     cell.font = font_data
                     cell.border = border_all
                     if is_even:
@@ -376,13 +384,17 @@ async def export_picking_audits(db: AsyncSession = Depends(get_db), accept_langu
                         cell.alignment = align_left
                     else:
                         cell.alignment = align_left
+
+                    # Actualizar ancho de columna
+                    val_str = str(val or '')
+                    if len(val_str) > col_widths[col_idx]:
+                        col_widths[col_idx] = len(val_str)
                 row_num += 1
             
-        # Ajustar ancho de columnas
-        for col in ws.columns:
-            max_len = max(len(str(cell.value or '')) for cell in col)
-            col_letter = col[0].column_letter
-            ws.column_dimensions[col_letter].width = max(max_len + 3, 12)
+        # Ajustar ancho de columnas usando el diccionario precalculado
+        for col_idx, width in col_widths.items():
+            col_letter = get_column_letter(col_idx)
+            ws.column_dimensions[col_letter].width = max(width + 3, 12)
             
         # Guardar en memoria
         file_stream = BytesIO()
@@ -391,8 +403,10 @@ async def export_picking_audits(db: AsyncSession = Depends(get_db), accept_langu
         
         filename = f"{filename_prefix}_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
         
-        return StreamingResponse(
-            file_stream,
+        from fastapi import Response
+
+        return Response(
+            content=file_stream.getvalue(),
             media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             headers={
                 "Content-Disposition": f"attachment; filename={filename}"
