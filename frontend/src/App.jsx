@@ -1,3 +1,5 @@
+// frontend/src/App.jsx
+
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { LanguageProvider } from './context/LanguageContext';
@@ -25,63 +27,88 @@ function App() {
       <Router>
         <Routes>
 
-        {/* Ruta de Login (Firma de Auditor) */}
-        <Route path="/login" element={<Login />} />
+          {/* Ruta de Login (Firma de Auditor) */}
+          <Route path="/login" element={<Login />} />
 
-        {/* Rutas Protegidas encapsuladas con Layout */}
-        <Route 
-          path="/" 
-          element={
-            <ProtectedRoute title="Dashboard">
-              <Dashboard />
-            </ProtectedRoute>
-          } 
-        />
-        
-        <Route 
-          path="/picking" 
-          element={
-            <ProtectedRoute title="Auditoría de Picking">
-              <PickingAudit />
-            </ProtectedRoute>
-          } 
-        />
-        
-        <Route 
-          path="/view_picking_audits" 
-          element={
-            <ProtectedRoute title="Pickings Empacados">
-              <PickingAuditHistory />
-            </ProtectedRoute>
-          } 
-        />
-        
-        <Route 
-          path="/shipments" 
-          element={
-            <ProtectedRoute title="Envíos Consolidados">
-              <Shipments />
-            </ProtectedRoute>
-          } 
-        />
-        
-        <Route 
-          path="/settings" 
-          element={
-            <ProtectedRoute title={localStorage.getItem('auditor_lang') === 'pt' ? 'Configuração' : 'Configuración'}>
-              <Settings />
-            </ProtectedRoute>
-          } 
-        />
+          {/* Rutas Protegidas encapsuladas con Layout */}
+          <Route 
+            path="/" 
+            element={
+              <ProtectedRoute title="Dashboard">
+                <div className="bg-gray-100 min-h-screen flex items-center justify-center">
+                  <div className="max-w-md p-8 bg-white rounded-lg shadow-lg">
+                    <h2 className="text-2xl font-bold mb-4">Bienvenido a Mi App</h2>
+                    <Dashboard />
+                  </div>
+                </div>
+              </ProtectedRoute>
+            } 
+          />
+          
+          <Route 
+            path="/picking" 
+            element={
+              <ProtectedRoute title="Auditoría de Picking">
+                <div className="bg-gray-100 min-h-screen flex items-center justify-center">
+                  <div className="max-w-md p-8 bg-white rounded-lg shadow-lg">
+                    <h2 className="text-2xl font-bold mb-4">Auditoría de Picking</h2>
+                    <PickingAudit />
+                  </div>
+                </div>
+              </ProtectedRoute>
+            } 
+          />
+          
+          <Route 
+            path="/view_picking_audits" 
+            element={
+              <ProtectedRoute title="Pickings Empacados">
+                <div className="bg-gray-100 min-h-screen flex items-center justify-center">
+                  <div className="max-w-md p-8 bg-white rounded-lg shadow-lg">
+                    <h2 className="text-2xl font-bold mb-4">Pickings Empacados</h2>
+                    <PickingAuditHistory />
+                  </div>
+                </div>
+              </ProtectedRoute>
+            } 
+          />
+          
+          <Route 
+            path="/shipments" 
+            element={
+              <ProtectedRoute title="Envíos Consolidados">
+                <div className="bg-gray-100 min-h-screen flex items-center justify-center">
+                  <div className="max-w-md p-8 bg-white rounded-lg shadow-lg">
+                    <h2 className="text-2xl font-bold mb-4">Envíos Consolidados</h2>
+                    <Shipments />
+                  </div>
+                </div>
+              </ProtectedRoute>
+            } 
+          />
+          
+          <Route 
+            path="/settings" 
+            element={
+              <ProtectedRoute title={localStorage.getItem('auditor_lang') === 'pt' ? 'Configuração' : 'Settings'}>
+                <div className="bg-gray-100 min-h-screen flex items-center justify-center">
+                  <div className="max-w-md p-8 bg-white rounded-lg shadow-lg">
+                    <h2 className="text-2xl font-bold mb-4">Configuración</h2>
+                    <Settings />
+                  </div>
+                </div>
+              </ProtectedRoute>
+            } 
+          />
 
-        {/* Vista previa de Impresión (Sin Layout para window.print) */}
-        <Route path="/packing_list/print/:id" element={<PackingListPrint />} />
+          {/* Vista previa de Impresión (Sin Layout para window.print) */}
+          <Route path="/packing_list/print/:id" element={<PackingListPrint />} />
 
-        {/* Fallback de redirección */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </Router>
-  </LanguageProvider>
+          {/* Fallback de redirección */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Router>
+    </LanguageProvider>
   );
 }
 
