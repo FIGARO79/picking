@@ -115,7 +115,7 @@ const Settings = () => {
         {/* Columna 1: Transportadoras */}
         <div className="card settings-card">
           <div className="card-header-fiori">
-            <h3>📦 {locale === 'pt' ? 'Gestão de Transportadoras' : 'Gestión de Transportadoras'}</h3>
+            <h3>{locale === 'pt' ? 'Gestão de Transportadoras' : 'Gestión de Transportadoras'}</h3>
             <p className="card-subtitle-fiori">
               {locale === 'pt' 
                 ? 'Adicione ou remova as empresas de transporte de carga.' 
@@ -137,7 +137,7 @@ const Settings = () => {
                   style={{ flex: 1, height: '36px', padding: '0 0.5rem', border: '1px solid #ccc', borderRadius: '4px' }}
                 />
                 <button type="submit" className="btn btn-primary" style={{ height: '36px', padding: '0 1rem', display: 'flex', alignItems: 'center' }}>
-                  ＋ {locale === 'pt' ? 'Adicionar' : 'Agregar'}
+                  {locale === 'pt' ? 'Adicionar' : 'Agregar'}
                 </button>
               </div>
             </div>
@@ -178,7 +178,7 @@ const Settings = () => {
                       }}
                       title={locale === 'pt' ? 'Remover' : 'Eliminar'}
                     >
-                      ✕
+                      ×
                     </button>
                   </div>
                 ))}
@@ -190,7 +190,7 @@ const Settings = () => {
         {/* Columna 2: Centros de Distribución */}
         <div className="card settings-card">
           <div className="card-header-fiori">
-            <h3>🏢 {locale === 'pt' ? 'Gestão de Centros de Distribuição' : 'Gestión de Centros de Distribución'}</h3>
+            <h3>{locale === 'pt' ? 'Gestão de Centros de Distribuição' : 'Gestión de Centros de Distribución'}</h3>
             <p className="card-subtitle-fiori">
               {locale === 'pt' 
                 ? 'Adicione ou remova os centros de distribuição ativos.' 
@@ -212,7 +212,7 @@ const Settings = () => {
                   style={{ flex: 1, height: '36px', padding: '0 0.5rem', border: '1px solid #ccc', borderRadius: '4px' }}
                 />
                 <button type="submit" className="btn btn-primary" style={{ height: '36px', padding: '0 1rem', display: 'flex', alignItems: 'center' }}>
-                  ＋ {locale === 'pt' ? 'Adicionar' : 'Agregar'}
+                  {locale === 'pt' ? 'Adicionar' : 'Agregar'}
                 </button>
               </div>
             </div>
@@ -253,7 +253,7 @@ const Settings = () => {
                       }}
                       title={locale === 'pt' ? 'Remover' : 'Eliminar'}
                     >
-                      ✕
+                      ×
                     </button>
                   </div>
                 ))}
@@ -271,7 +271,7 @@ const Settings = () => {
             marginTop: '1.5rem',
             lineHeight: '1.4'
           }}>
-            ℹ️ {locale === 'pt' 
+            {locale === 'pt' 
               ? 'O Centro de Distribuição selecionado na impressão será impresso abaixo da linha de assinatura do operador em todas as vias dos volumes.' 
               : 'El Centro de Distribución seleccionado en la impresión se imprimirá debajo de la línea de firma del operador en todas las etiquetas de bultos.'}
           </div>

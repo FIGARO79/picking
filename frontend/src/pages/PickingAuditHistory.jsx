@@ -291,7 +291,7 @@ const PickingAuditHistory = () => {
               className="btn btn-secondary btn-export-excel"
               disabled={exporting}
             >
-              📊 {exporting ? t('editModalSaving') : t('exportExcelBtn')}
+              {exporting ? t('editModalSaving') : t('exportExcelBtn')}
             </button>
           </div>
           <div className="table-container history-table-container">
@@ -424,10 +424,10 @@ const PickingAuditHistory = () => {
             onClick={() => setShowShipmentModal(true)} 
             className="btn btn-primary btn-consolidate"
           >
-            🚚 {t('consolidateBtn')}
+            {t('consolidateBtn')}
           </button>
           <button onClick={() => setSelectedIds(new Set())} className="btn-cancel-selection">
-            ✕ {locale === 'pt' ? 'Limpar' : 'Limpiar'}
+            {locale === 'pt' ? 'Limpar' : 'Limpiar'}
           </button>
         </div>
       )}
@@ -486,7 +486,7 @@ const PickingAuditHistory = () => {
         <div className="modal-overlay">
           <div className="modal-content edit-audit-modal">
             <div className="modal-header">
-              <h3>📦 {t('editModalTitle')} #{editingAudit.id}</h3>
+              <h3>{t('editModalTitle')} #{editingAudit.id}</h3>
               <div className="modal-header-controls">
                 <div className="pkg-edit-controls">
                   <span className="pkg-lbl">{t('assignTableHeaderPkg')}s: <strong>{editingAudit.packages}</strong></span>

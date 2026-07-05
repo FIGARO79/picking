@@ -98,7 +98,7 @@ const Shipments = () => {
 
       <div className="shipments-action-bar no-print">
         <button onClick={fetchShipments} className="btn btn-secondary">
-          🔄 {t('syncBtn')}
+          {t('syncBtn')}
         </button>
       </div>
 

@@ -26,7 +26,7 @@ const Login = () => {
   return (
     <div className="login-overlay">
       <div className="login-card">
-        <div className="login-logo">📦</div>
+        <div className="login-logo">LOGIX<span className="logo-dot">.</span></div>
         <h1>{t('welcomeTitle')}</h1>
         <p className="login-subtitle">{t('welcomeSubtitle')}</p>
         
@@ -86,14 +86,16 @@ const Login = () => {
         }
 
         .login-logo {
-          font-size: 3rem;
+          font-size: 2.25rem;
+          font-weight: 700;
+          letter-spacing: 0.1em;
+          color: #0f172a;
           margin-bottom: 1rem;
           display: inline-block;
-          background: #f1f5f9;
-          width: 72px;
-          height: 72px;
-          line-height: 72px;
-          border-radius: var(--radius-md);
+        }
+
+        .logo-dot {
+          color: var(--primary);
         }
 
         .login-card h1 {

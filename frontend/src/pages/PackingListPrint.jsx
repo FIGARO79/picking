@@ -139,12 +139,12 @@ const PackingListPrint = () => {
             </div>
           </div>
           <div className="control-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <button onClick={() => navigate(-1)} className="btn btn-secondary">
-              ✕ {t('printCloseBtn')}
-            </button>
-            <button onClick={handlePrint} className="btn btn-primary print-trigger-btn">
-              🖨️ {t('printExecuteBtn')}
-            </button>
+             <button onClick={() => navigate(-1)} className="btn btn-secondary">
+               {t('printCloseBtn')}
+             </button>
+             <button onClick={handlePrint} className="btn btn-primary print-trigger-btn">
+               {t('printExecuteBtn')}
+             </button>
           </div>
         </div>
       </div>

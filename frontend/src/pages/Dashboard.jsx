@@ -14,21 +14,18 @@ const Dashboard = () => {
     {
       titleKey: 'moduleAuditTitle',
       descKey: 'moduleAuditDesc',
-      icon: '🔍',
       color: '#285f94',
       path: '/picking'
     },
     {
       titleKey: 'moduleHistoryTitle',
       descKey: 'moduleHistoryDesc',
-      icon: '📦',
       color: '#10b981',
       path: '/view_picking_audits'
     },
     {
       titleKey: 'moduleShipmentsTitle',
       descKey: 'moduleShipmentsDesc',
-      icon: '🚚',
       color: '#f59e0b',
       path: '/shipments'
     }
@@ -85,12 +82,10 @@ const Dashboard = () => {
             onClick={() => navigate(m.path)}
             style={{ '--accent-color': m.color }}
           >
-            <div className="module-icon">{m.icon}</div>
             <div className="module-details">
               <h3>{t(m.titleKey)}</h3>
               <p>{t(m.descKey)}</p>
             </div>
-            <span className="module-arrow">→</span>
           </div>
         ))}
       </div>
@@ -98,7 +93,7 @@ const Dashboard = () => {
       {/* Sección de Actualización de Datos */}
       <div className="card upload-section">
         <div className="upload-header">
-          <h3>📂 {t('uploadSectionTitle')}</h3>
+          <h3>{t('uploadSectionTitle')}</h3>
           <p>{t('uploadSectionDesc')}</p>
         </div>
 
@@ -112,7 +107,6 @@ const Dashboard = () => {
               className="file-input"
             />
             <label htmlFor="picking-file-input" className="file-label">
-              <span className="upload-cloud">☁️</span>
               {file ? (
                 <span className="file-name">{t('selectedFile')} <strong>{file.name}</strong></span>
               ) : (
@@ -148,13 +142,13 @@ const Dashboard = () => {
         .module-card {
           background-color: var(--bg-card);
           border: 1px solid var(--border-color);
-          border-left: 5px solid var(--accent-color);
+          border-left: 4px solid var(--accent-color);
           border-radius: var(--radius-md);
           padding: 1.75rem;
           box-shadow: var(--shadow-sm);
           display: flex;
-          align-items: center;
-          gap: 1.25rem;
+          flex-direction: column;
+          gap: 0.5rem;
           cursor: pointer;
           transition: var(--transition-normal);
           position: relative;
@@ -163,50 +157,27 @@ const Dashboard = () => {
 
         .module-card:hover {
           transform: translateY(-2px);
-          box-shadow: var(--shadow-lg);
+          box-shadow: var(--shadow-md);
+          border-color: var(--border-color);
           background-color: #fafbfc;
         }
 
-        .module-icon {
-          font-size: 2.25rem;
-          background-color: var(--bg-app);
-          width: 56px;
-          height: 56px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          border-radius: var(--radius-sm);
-          flex-shrink: 0;
-        }
-
         .module-details {
-          flex-grow: 1;
           display: flex;
           flex-direction: column;
-          gap: 0.25rem;
+          gap: 0.35rem;
         }
 
         .module-details h3 {
-          font-size: 1.05rem;
+          font-size: 1.1rem;
           font-weight: 600;
           color: var(--accent);
         }
 
         .module-details p {
-          font-size: 0.8rem;
+          font-size: 0.85rem;
           color: var(--text-muted);
-          line-height: 1.3;
-        }
-
-        .module-arrow {
-          font-size: 1.2rem;
-          color: var(--text-light);
-          transition: var(--transition-fast);
-        }
-
-        .module-card:hover .module-arrow {
-          color: var(--primary);
-          transform: translateX(3px);
+          line-height: 1.4;
         }
 
         .upload-section {
@@ -219,6 +190,8 @@ const Dashboard = () => {
 
         .upload-header h3 {
           margin-bottom: 0.25rem;
+          font-weight: 600;
+          color: var(--accent);
         }
 
         .upload-form {
@@ -228,10 +201,10 @@ const Dashboard = () => {
         }
 
         .file-dropzone {
-          border: 2px dashed #cbd5e1;
+          border: 1px dashed var(--border-color);
           border-radius: var(--radius-md);
           background-color: #f8fafc;
-          padding: 2.5rem;
+          padding: 3rem 2rem;
           text-align: center;
           cursor: pointer;
           position: relative;
@@ -256,11 +229,6 @@ const Dashboard = () => {
           align-items: center;
           gap: 0.5rem;
           cursor: pointer;
-        }
-
-        .upload-cloud {
-          font-size: 2.5rem;
-          margin-bottom: 0.25rem;
         }
 
         .file-instruction {

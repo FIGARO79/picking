@@ -23,11 +23,11 @@ const Layout = ({ children, title }) => {
   };
 
   const navItems = [
-    { path: '/', labelKey: 'menuDashboard', icon: '📊' },
-    { path: '/picking', labelKey: 'menuAudit', icon: '🔍' },
-    { path: '/view_picking_audits', labelKey: 'menuHistory', icon: '📦' },
-    { path: '/shipments', labelKey: 'menuShipments', icon: '🚚' },
-    { path: '/settings', labelKey: 'menuSettings', icon: '⚙️' }
+    { path: '/', labelKey: 'menuDashboard' },
+    { path: '/picking', labelKey: 'menuAudit' },
+    { path: '/view_picking_audits', labelKey: 'menuHistory' },
+    { path: '/shipments', labelKey: 'menuShipments' },
+    { path: '/settings', labelKey: 'menuSettings' }
   ];
 
   const getTranslatedTitle = (currentTitle) => {
@@ -50,9 +50,8 @@ const Layout = ({ children, title }) => {
       {/* Barra Lateral Premium */}
       <aside className="sidebar no-print">
         <div className="sidebar-logo">
-          <span className="logo-icon">📦</span>
           <div className="logo-text">
-            <h2>LOGIX</h2>
+            <h2>LOGIX<span className="logo-dot">.</span></h2>
             <span>{t('welcomeSubtitle')}</span>
           </div>
         </div>
@@ -66,7 +65,6 @@ const Layout = ({ children, title }) => {
                 `nav-item ${isActive ? 'active' : ''}`
               }
             >
-              <span className="nav-icon">{item.icon}</span>
               <span className="nav-label">{t(item.labelKey)}</span>
             </NavLink>
           ))}
@@ -93,14 +91,16 @@ const Layout = ({ children, title }) => {
 
         <div className="sidebar-footer">
           <div className="auditor-profile">
-            <div className="profile-avatar">👤</div>
+            <div className="profile-avatar">
+              {auditorName ? auditorName.trim().charAt(0).toUpperCase() : 'OP'}
+            </div>
             <div className="profile-info">
               <span className="profile-title">{t('shiftActive')}</span>
               <span className="profile-name" title={auditorName}>{auditorName || 'N/A'}</span>
             </div>
           </div>
           <button onClick={handleLogout} className="btn-logout" title={t('endShift')}>
-            🚪 {t('endShift')}
+            {t('endShift')}
           </button>
         </div>
       </aside>
@@ -140,18 +140,16 @@ const Layout = ({ children, title }) => {
           padding-left: 0.5rem;
         }
 
-        .logo-icon {
-          font-size: 1.75rem;
-          background: rgba(255,255,255,0.1);
-          padding: 0.25rem;
-          border-radius: var(--radius-sm);
-        }
-
         .logo-text h2 {
           color: white;
-          font-size: 1.15rem;
-          font-weight: 600;
+          font-size: 1.25rem;
+          font-weight: 700;
           line-height: 1.1;
+          letter-spacing: 0.1em;
+        }
+
+        .logo-dot {
+          color: var(--primary);
         }
 
         .logo-text span {
@@ -164,6 +162,7 @@ const Layout = ({ children, title }) => {
           text-overflow: ellipsis;
           max-width: 150px;
           display: block;
+          margin-top: 0.2rem;
         }
 
         .sidebar-nav {
@@ -176,24 +175,36 @@ const Layout = ({ children, title }) => {
         .nav-item {
           display: flex;
           align-items: center;
-          gap: 0.75rem;
-          padding: 0.75rem 1rem;
+          padding: 0.75rem 1rem 0.75rem 1.25rem;
           border-radius: var(--radius-sm);
           color: #94a3b8;
           text-decoration: none;
           font-size: 0.9rem;
           font-weight: 500;
           transition: var(--transition-fast);
+          position: relative;
         }
 
         .nav-item:hover {
           color: white;
-          background-color: rgba(255,255,255,0.05);
+          background-color: rgba(255,255,255,0.03);
         }
 
         .nav-item.active {
           color: white;
+          background-color: rgba(255,255,255,0.06);
+          font-weight: 600;
+        }
+
+        .nav-item.active::before {
+          content: "";
+          position: absolute;
+          left: 0;
+          top: 0;
+          bottom: 0;
+          width: 3px;
           background-color: var(--primary);
+          border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
         }
 
         /* Selector de Idioma */
@@ -255,14 +266,16 @@ const Layout = ({ children, title }) => {
         }
 
         .profile-avatar {
-          font-size: 1.25rem;
-          background: rgba(255,255,255,0.1);
+          font-size: 0.85rem;
+          font-weight: 600;
+          background: var(--primary);
+          color: white;
           width: 32px;
           height: 32px;
           display: flex;
           align-items: center;
           justify-content: center;
-          border-radius: var(--radius-sm);
+          border-radius: 50%;
         }
 
         .profile-info {

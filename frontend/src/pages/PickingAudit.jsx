@@ -534,7 +534,6 @@ const PickingAudit = () => {
               animation: 'slideDown 0.25s ease-out'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ fontSize: '1.2rem' }}>⚠️</span>
                 <span style={{ fontSize: '0.9rem', color: '#8b0000', fontWeight: '600' }}>{scanError}</span>
               </div>
               <button 
