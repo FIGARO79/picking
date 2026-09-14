@@ -8,14 +8,38 @@
 
 ### ¿Qué es este sistema?
 
-**LOGIX WMS** es una aplicación web de auditoría y empaque de pedidos de picking. Permite a los operadores de bodega:
+**LOGIX WMS** es una aplicación web empresarial de auditoría de pedidos, control dimensional y empaque de despacho (Packing List). Diseñada con la filosofía visual **Microsoft Fluent UI**, permite a los operadores de bodega gestionar de manera ágil y rigurosa todo el ciclo de verificación previo al envío.
 
-- Cargar y verificar pedidos de picking por número de orden y despacho
-- Escanear SKUs mediante cámara (QR/barras) o entrada manual
-- Asignar artículos a bultos y registrar dimensiones y peso de cada caja
-- Generar e imprimir Packing Lists por bulto con soporte multi-idioma
-- Gestionar transportadoras y configuración de bodega
-- Consultar el historial de auditorías realizadas
+### 🌟 Funcionalidades Principales
+
+- **Auditoría de Picking Ciega**: Verificación de artículos sin mostrar cantidades requeridas ni diferencias en pantalla, garantizando un control físico objetivo y libre de sesgos.
+- **Cálculo Automático de Pesos**:
+  - Peso unitario sincronizado automáticamente desde el maestro o reporte logístico 240 (`AURRSGLBD0240.csv`).
+  - **Peso de Línea**: Cálculo dinámico en tiempo real (`cantidad escaneada × peso unitario`).
+  - **Peso Neto**: Sumatoria del peso físico de todos los artículos escaneados.
+  - **Peso Bruto**: Peso de báscula registrado por el operador para cada caja o bulto.
+  - **Peso Requerido**: Peso teórico de referencia según la orden original.
+  - Indicador de tara/diferencia entre báscula y peso neto.
+- **Registro Dimensional y Volumétrico de Bultos**:
+  - Captura de **Largo × Ancho × Alto (cm)** y peso por bulto.
+  - Cálculo automático de volumen en decímetros cúbicos (dm³).
+- **Packing List Imprimible por Bulto**:
+  - Generación de etiquetas y hojas de empaque paginadas (`PÁG 1 / N`).
+  - Tabla detallada con columna de **PESO LÍNEA** y pie de tabla con totales.
+  - Resumen inferior con **PESO NETO DEL BULTO**, **PESO BRUTO** y **MEDIDAS DEL BULTO**.
+  - Estilos de impresión física optimizados (`@media print`) para formato carta o térmico sin cortes.
+- **Envíos Consolidados (Shipments)**:
+  - Agrupación de múltiples auditorías para un mismo transportista o ruta.
+  - Packing List consolidado multi-orden.
+- **Historial Completo y Exportación a Excel**:
+  - Tabla histórica con desglose expandible de pesos, medidas de bultos y artículos auditados.
+  - Exportación a `.xlsx` estilizado profesionalmente con todas las métricas de peso (bruto, neto, requerido y por línea).
+- **Gestión y Actualización de Archivos**:
+  - Página dedicada (`/update`) accesible desde el menú de Configuración para subir reportes actualizados.
+- **Diseño Microsoft Fluent UI**:
+  - Interfaz de alto contraste, tipografía optimizada, navegación fluida con Drawer lateral y componentes modales accesibles.
+- **Bilingüe (i18n)**:
+  - Soporte nativo para Español (`es`) y Portugués de Brasil (`pt-BR`).
 
 ### 🛠️ Requisitos previos
 
@@ -25,8 +49,8 @@
 | **Node.js** | 18+ | ❌ No, manual | Descargar en https://nodejs.org |
 | **npm** | 8+ | ✅ Sí | Se incluye con Node.js |
 
-> ⚠️ **Windows**: El script `start.bat` instala Python automáticamente mediante [Astral UV](https://docs.astral.sh/uv/), pero **Node.js debe instalarse manualmente** antes de ejecutar el script.
-> 👉 Descarga Node.js LTS aqui: **https://nodejs.org/es/download**
+> ⚠️ **Windows**: El script `start.bat` instala Python automáticamente mediante [Astral UV](https://docs.astral.sh/uv/), pero **Node.js debe instalarse manualmente** antes de ejecutar el script.  
+> 👉 Descarga Node.js LTS aquí: **https://nodejs.org/es/download**
 
 ### 🚀 Instalación y ejecución
 
@@ -40,7 +64,7 @@ cd picking
 # 2. Dar permisos al script de inicio
 chmod +x start.sh
 
-# 3. Iniciar la aplicación (instala dependencias automáticamente)
+# 3. Iniciar la aplicación (instala dependencias y arranca backend y frontend)
 ./start.sh
 ```
 
@@ -62,7 +86,6 @@ cd picking
 start.bat
 ```
 
-> En ambos casos, el script `start.bat` instala Python automáticamente.
 > ⚠️ **Node.js debe estar instalado previamente**: https://nodejs.org/es/download
 
 ### 🌐 URLs de acceso
@@ -71,7 +94,7 @@ start.bat
 |----------|-----|
 | **Frontend** (interfaz web) | http://localhost:5173 |
 | **Backend API** (FastAPI) | http://127.0.0.1:8000 |
-| **Documentación API** | http://127.0.0.1:8000/docs |
+| **Documentación API** (Swagger) | http://127.0.0.1:8000/docs |
 
 ### 📁 Estructura del proyecto
 
@@ -79,19 +102,23 @@ start.bat
 picking/
 ├── backend/
 │   ├── app/
-│   │   ├── core/          # Configuración, base de datos, i18n
-│   │   ├── models/        # Esquemas Pydantic y modelos SQL
-│   │   └── routers/       # Endpoints: picking, config, shipments
-│   ├── databases/         # Archivos CSV y base de datos SQLite
-│   ├── main.py            # Punto de entrada FastAPI
+│   │   ├── core/          # Configuración, SQLite asíncrono, i18n
+│   │   ├── models/        # Esquemas Pydantic y modelos SQLAlchemy
+│   │   └── routers/       # Endpoints: picking, shipments, config
+│   ├── databases/         # CSV maestro (AURRSGLBD0240.csv) y SQLite (picking.db)
+│   ├── main.py            # Entrada FastAPI
 │   └── requirements.txt   # Dependencias Python
 ├── frontend/
 │   ├── src/
-│   │   ├── components/    # ScannerModal, DimensionScanner, Layout
-│   │   ├── context/       # Contexto de idioma (ES/PT)
-│   │   ├── pages/         # Dashboard, PickingAudit, PackingListPrint...
-│   │   └── utils/         # Traducciones
-│   └── package.json
+│   │   ├── components/    # Layout, ScannerModal, DimensionScanner, Spinner
+│   │   ├── context/       # LanguageContext (ES / PT)
+│   │   ├── pages/         # Dashboard, PickingAudit, PickingAuditHistory,
+│   │   │                  # PackingListPrint, Shipments, Settings, FileUploadPage
+│   │   ├── styles/        # FluentPages.css (Diseño Microsoft Fluent UI)
+│   │   └── utils/         # Diccionario de traducciones (translations.js)
+│   ├── package.json
+│   ├── tailwind.config.js
+│   └── vite.config.js
 ├── start.sh               # Script de inicio (Linux/macOS)
 └── start.bat              # Script de inicio (Windows)
 ```
@@ -99,36 +126,34 @@ picking/
 ### ⚙️ Stack tecnológico
 
 **Backend**
-- [FastAPI](https://fastapi.tiangolo.com/) — Framework web asíncrono
-- [SQLAlchemy](https://www.sqlalchemy.org/) — ORM con SQLite
-- [Polars](https://pola.rs/) — Procesamiento de archivos CSV/Excel
+- [FastAPI](https://fastapi.tiangolo.com/) — API web asíncrona de alto rendimiento
+- [SQLAlchemy](https://www.sqlalchemy.org/) — ORM asíncrono con base de datos SQLite
+- [Polars](https://pola.rs/) — Lectura ultrarrápida y normalización de archivos de picking
+- [OpenPyXL](https://openpyxl.readthedocs.io/) — Generación de informes Excel con formato institucional
 - [Uvicorn](https://www.uvicorn.org/) — Servidor ASGI
 
 **Frontend**
 - [React 18](https://react.dev/) + [Vite](https://vitejs.dev/)
-- CSS puro con variables de diseño (sin Tailwind)
-- API de cámara nativa del navegador para escaneo QR/códigos de barras
+- [Tailwind CSS](https://tailwindcss.com/) + Hoja de estilos **Fluent UI** (`FluentPages.css`)
+- [Lucide React](https://lucide.dev/) — Iconografía moderna
+- API nativa de cámara / MediaDevices para escaneo de códigos QR y barras
+- [React-Toastify](https://fkhadra.github.io/react-toastify/) — Notificaciones contextuales
 
-### 🔧 Ejecución manual (sin scripts)
+### 🔧 Ejecución manual (desarrollo)
 
 ```bash
-# Backend
+# Terminal 1: Backend
 cd backend
 python3 -m venv venv
-source venv/bin/activate          # Windows: venv\Scripts\activate
+source venv/bin/activate          # En Windows: venv\Scripts\activate
 pip install -r requirements.txt
 uvicorn main:app --host 127.0.0.1 --port 8000 --reload
 
-# Frontend (en otra terminal)
+# Terminal 2: Frontend
 cd frontend
 npm install
 npm run dev
 ```
-
-### 🛑 Detener la aplicación
-
-- **Linux/macOS**: Presiona `Ctrl+C` en la terminal donde corre `start.sh`
-- **Windows**: Cierra las dos ventanas de consola abiertas por `start.bat`
 
 ---
 
@@ -136,14 +161,36 @@ npm run dev
 
 ### O que é este sistema?
 
-**LOGIX WMS** é uma aplicação web de auditoria e empacotamento de pedidos de picking. Permite aos operadores de armazém:
+**LOGIX WMS** é uma aplicação web corporativa para auditoria de pedidos de picking, medição volumétrica e emissão de listas de embalagem (Packing List). Desenvolvida sob o padrão visual **Microsoft Fluent UI**, proporciona agilidade, precisão e rastreabilidade total às operações logísticas de armazém.
 
-- Carregar e verificar pedidos de picking por número de ordem e despacho
-- Escanear SKUs via câmera (QR/código de barras) ou entrada manual
-- Atribuir itens a volumes e registrar dimensões e peso de cada caixa
-- Gerar e imprimir Packing Lists por volume com suporte multi-idioma
-- Gerenciar transportadoras e configuração do armazém
-- Consultar o histórico de auditorias realizadas
+### 🌟 Principais Funcionalidades
+
+- **Auditoria de Picking Cega**: Contagem física sem exibir quantidades requisitadas ou diferenças na tela, prevenindo vícios e garantindo máxima conformidade.
+- **Cálculo Automático de Pesos**:
+  - Peso unitário obtido automaticamente da base ou relatório 240 (`AURRSGLBD0240.csv`).
+  - **Peso por Linha**: Multiplicação em tempo real (`quantidade lida × peso unitário`).
+  - **Peso Líquido**: Soma do peso de todos os itens conferidos.
+  - **Peso Bruto**: Peso de balança informado pelo operador para cada volume.
+  - **Peso Requisitado**: Peso teórico de referência do pedido original.
+- **Medições e Cubagem dos Volumes**:
+  - Registro de **Comprimento × Largura × Altura (cm)** e peso por caixa/volume.
+  - Cálculo automático de cubagem em decímetros cúbicos (dm³).
+- **Packing List Imprimível por Volume**:
+  - Emissão paginada por volume (`PÁG 1 / N`).
+  - Tabela com coluna **PESO LINHA** e rodapé com totalizadores.
+  - Bloco de resumo inferior com **PESO LÍQUIDO DO VOLUME**, **PESO BRUTO** e **MEDIDAS DO VOLUME**.
+  - Otimizado para impressão direta ou geração de PDF (`@media print`).
+- **Despachos Consolidados (Shipments)**:
+  - Agrupamento de pedidos em remessas por transportadora com Packing List unificado.
+- **Histórico Completo e Exportação para Excel**:
+  - Painel com detalhamento expansível de pesos, medidas e itens auditados.
+  - Exportação para `.xlsx` estilizado profissionalmente com métricas completas de peso.
+- **Atualização de Arquivos**:
+  - Tela dedicada (`/update`) acessível pelo menu de Configurações para upload de planilhas.
+- **Interface Microsoft Fluent UI**:
+  - Alto contraste, navegação fluida com Drawer lateral, tipografia corporativa e excelente usabilidade.
+- **Suporte Bilíngue**:
+  - Disponível em Espanhol (`es`) e Português do Brasil (`pt-BR`).
 
 ### 🛠️ Pré-requisitos
 
@@ -153,7 +200,7 @@ npm run dev
 | **Node.js** | 18+ | ❌ Não, manual | Baixar em https://nodejs.org |
 | **npm** | 8+ | ✅ Sim | Incluído com o Node.js |
 
-> ⚠️ **Windows**: O script `start.bat` instala o Python automaticamente via [Astral UV](https://docs.astral.sh/uv/), mas o **Node.js deve ser instalado manualmente** antes de executar o script.
+> ⚠️ **Windows**: O script `start.bat` instala o Python automaticamente via [Astral UV](https://docs.astral.sh/uv/), mas o **Node.js deve ser instalado manualmente** antes de executar o script.  
 > 👉 Baixe o Node.js LTS aqui: **https://nodejs.org/pt/download**
 
 ### 🚀 Instalação e execução
@@ -168,7 +215,7 @@ cd picking
 # 2. Dar permissão ao script de início
 chmod +x start.sh
 
-# 3. Iniciar a aplicação (instala dependências automaticamente)
+# 3. Iniciar a aplicação
 ./start.sh
 ```
 
@@ -177,21 +224,17 @@ chmod +x start.sh
 **Opção A — Baixar ZIP (sem Git)**
 
 1. Acesse **https://github.com/FIGARO79/picking**
-2. Clique no botão verde **`< > Code`** → **`Download ZIP`**
-3. Extraia o ZIP na pasta de sua preferência (ex: `C:\picking`)
-4. Dentro da pasta extraída, dê **duplo clique em `start.bat`**
+2. Clique em **`< > Code`** → **`Download ZIP`**
+3. Extraia o arquivo ZIP (ex: `C:\picking`)
+4. Dê **duplo clique em `start.bat`**
 
 **Opção B — Clonar com Git**
 
 ```bat
-REM Pelo CMD ou PowerShell:
 git clone https://github.com/FIGARO79/picking.git
 cd picking
 start.bat
 ```
-
-> Em ambos os casos, o script `start.bat` instala o Python automaticamente.
-> ⚠️ **O Node.js deve estar instalado previamente**: https://nodejs.org/pt/download
 
 ### 🌐 URLs de acesso
 
@@ -199,70 +242,28 @@ start.bat
 |---------|-----|
 | **Frontend** (interface web) | http://localhost:5173 |
 | **Backend API** (FastAPI) | http://127.0.0.1:8000 |
-| **Documentação da API** | http://127.0.0.1:8000/docs |
-
-### 📁 Estrutura do projeto
-
-```
-picking/
-├── backend/
-│   ├── app/
-│   │   ├── core/          # Configuração, banco de dados, i18n
-│   │   ├── models/        # Schemas Pydantic e modelos SQL
-│   │   └── routers/       # Endpoints: picking, config, shipments
-│   ├── databases/         # Arquivos CSV e banco de dados SQLite
-│   ├── main.py            # Ponto de entrada FastAPI
-│   └── requirements.txt   # Dependências Python
-├── frontend/
-│   ├── src/
-│   │   ├── components/    # ScannerModal, DimensionScanner, Layout
-│   │   ├── context/       # Contexto de idioma (ES/PT)
-│   │   ├── pages/         # Dashboard, PickingAudit, PackingListPrint...
-│   │   └── utils/         # Traduções
-│   └── package.json
-├── start.sh               # Script de início (Linux/macOS)
-└── start.bat              # Script de início (Windows)
-```
+| **Documentação da API** (Swagger) | http://127.0.0.1:8000/docs |
 
 ### ⚙️ Stack tecnológico
 
 **Backend**
 - [FastAPI](https://fastapi.tiangolo.com/) — Framework web assíncrono
-- [SQLAlchemy](https://www.sqlalchemy.org/) — ORM com SQLite
-- [Polars](https://pola.rs/) — Processamento de arquivos CSV/Excel
+- [SQLAlchemy](https://www.sqlalchemy.org/) — ORM assíncrono com SQLite
+- [Polars](https://pola.rs/) — Processamento eficiente de dados e CSVs
+- [OpenPyXL](https://openpyxl.readthedocs.io/) — Relatórios em Excel (.xlsx)
 - [Uvicorn](https://www.uvicorn.org/) — Servidor ASGI
 
 **Frontend**
 - [React 18](https://react.dev/) + [Vite](https://vitejs.dev/)
-- CSS puro com variáveis de design (sem Tailwind)
-- API de câmera nativa do navegador para leitura de QR/código de barras
-
-### 🔧 Execução manual (sem scripts)
-
-```bash
-# Backend
-cd backend
-python3 -m venv venv
-source venv/bin/activate          # Windows: venv\Scripts\activate
-pip install -r requirements.txt
-uvicorn main:app --host 127.0.0.1 --port 8000 --reload
-
-# Frontend (em outro terminal)
-cd frontend
-npm install
-npm run dev
-```
-
-### 🛑 Parar a aplicação
-
-- **Linux/macOS**: Pressione `Ctrl+C` no terminal onde está rodando `start.sh`
-- **Windows**: Feche as duas janelas de console abertas pelo `start.bat`
+- [Tailwind CSS](https://tailwindcss.com/) + Estilos **Fluent UI**
+- [Lucide React](https://lucide.dev/) — Conjunto de ícones
+- Scanner de códigos via API nativa de câmera
 
 ---
 
 <div align="center">
 
 **LOGIX WMS** · Auditoría de Picking / Auditoria de Picking  
-Desarrollado con ❤️ para operaciones de bodega / Desenvolvido com ❤️ para operações de armazém
+Desarrollado para operaciones de bodega / Desenvolvido para operações de armazém
 
 </div>
