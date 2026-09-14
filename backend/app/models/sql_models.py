@@ -33,6 +33,7 @@ class PickingAuditItem(Base):
     qty_req: Mapped[int] = mapped_column(Integer, nullable=False)
     qty_scan: Mapped[int] = mapped_column(Integer, nullable=False)
     difference: Mapped[int] = mapped_column(Integer, nullable=False)
+    item_weight: Mapped[Optional[float]] = mapped_column(Float, default=0.0)
     edited: Mapped[Optional[int]] = mapped_column(Integer, default=0)
 
     audit = relationship("PickingAudit", back_populates="items")

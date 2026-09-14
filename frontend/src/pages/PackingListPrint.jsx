@@ -167,6 +167,21 @@ const PackingListPrint = () => {
           return sortedKeys.map((pkgNum, pkgIdx) => {
             const items = packages[pkgNum] || [];
 
+            // Calcular totales del bulto
+            const pkgTotalQty = items.reduce((acc, it) => acc + (Number(it.quantity) || 0), 0);
+            const pkgTotalNetWeight = items.reduce((acc, it) => {
+              const lineWt = it.line_weight != null ? Number(it.line_weight) : ((Number(it.item_weight) || 0) * (Number(it.quantity) || 0));
+              return acc + lineWt;
+            }, 0);
+
+            const dims = order.packages_dimensions?.[pkgNum] || {};
+            const grossWeight = dims.weight != null ? Number(dims.weight) : 0;
+            const length = dims.length != null ? Number(dims.length) : 0;
+            const width = dims.width != null ? Number(dims.width) : 0;
+            const height = dims.height != null ? Number(dims.height) : 0;
+            const hasDims = length > 0 || width > 0 || height > 0;
+            const volumeDm3 = hasDims ? ((length * width * height) / 1000).toFixed(2) : null;
+
             // Determinar si debemos forzar salto de página tras este bulto
             const isLastOfAll = orderIdx === orders.length - 1 && pkgIdx === sortedKeys.length - 1;
             const style = isLastOfAll ? {} : { pageBreakAfter: 'always' };
@@ -207,49 +222,101 @@ const PackingListPrint = () => {
                 </div>
 
                 {/* Cabecera del Bulto */}
-                {(() => {
-                  const dims = order.packages_dimensions?.[pkgNum];
-                  const hasDims = dims && (dims.length > 0 || dims.width > 0 || dims.height > 0 || dims.weight > 0);
-                  return (
-                    <div className="print-pkg-header">
-                      <div className="pkg-title-group">
-                        <h3>{t('expandedDetailTablePkg')} #{pkgNum}</h3>
-                        <span className="pkg-total-lbl">{t('printLabelPackages')}: {order.total_packages}</span>
-                        {hasDims && (
-                          <span className="pkg-dims-lbl" style={{ fontSize: '0.85rem', color: '#111', marginTop: '6px', fontWeight: '500' }}>
-                            {locale === 'pt' ? 'Medidas' : 'Dimensiones'}: <strong>{dims.length}x{dims.width}x{dims.height} cm</strong> | {locale === 'pt' ? 'Peso' : 'Peso'}: <strong>{dims.weight} kg</strong>
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })()}
+                <div className="print-pkg-header">
+                  <div className="pkg-title-group">
+                    <h3>{t('expandedDetailTablePkg')} #{pkgNum}</h3>
+                    <span className="pkg-total-lbl">{t('printLabelPackages')}: {order.total_packages}</span>
+                  </div>
+                  <div className="pkg-badge-group">
+                    <span className="pkg-tag-badge">BULTO {pkgIdx + 1} DE {sortedKeys.length}</span>
+                  </div>
+                </div>
 
                 {/* Tabla de Artículos del Bulto */}
                 <table className="print-items-table">
                   <thead>
                     <tr>
-                      <th style={{ width: '60px' }}>{t('tableHeaderLine')}</th>
+                      <th style={{ width: '50px' }}>{t('tableHeaderLine')}</th>
                       <th style={{ width: '120px' }}>{t('printTableItemsSku')}</th>
                       <th>{t('printTableItemsDesc')}</th>
-                      <th className="text-right" style={{ width: '80px' }}>{t('assignTableHeaderTotal')}</th>
+                      <th className="text-right" style={{ width: '70px' }}>{locale === 'pt' ? 'QTD' : 'CANT'}</th>
+                      <th className="text-right" style={{ width: '100px' }}>{t('tableHeaderWeight')}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {items.length === 0 ? (
-                      <tr><td colSpan="4" className="text-center py-4 italic">{locale === 'pt' ? 'Volume vazio' : 'Bulto vacío'}</td></tr>
+                      <tr><td colSpan="5" className="text-center py-4 italic">{locale === 'pt' ? 'Volume vazio' : 'Bulto vacío'}</td></tr>
                     ) : (
-                      items.map((item, iIdx) => (
-                        <tr key={iIdx}>
-                          <td className="text-mono text-muted">{item.order_line}</td>
-                          <td className="text-mono"><strong>{item.item_code}</strong></td>
-                          <td className="sku-desc">{item.description}</td>
-                          <td className="text-right text-mono font-medium">{item.quantity}</td>
-                        </tr>
-                      ))
+                      items.map((item, iIdx) => {
+                        const lineWt = item.line_weight != null ? Number(item.line_weight) : ((Number(item.item_weight) || 0) * (Number(item.quantity) || 0));
+                        return (
+                          <tr key={iIdx}>
+                            <td className="text-mono text-muted">{item.order_line}</td>
+                            <td className="text-mono"><strong>{item.item_code}</strong></td>
+                            <td className="sku-desc">{item.description}</td>
+                            <td className="text-right text-mono font-medium">{item.quantity}</td>
+                            <td className="text-right text-mono font-bold">{lineWt.toFixed(3)} kg</td>
+                          </tr>
+                        );
+                      })
                     )}
                   </tbody>
+                  <tfoot>
+                    <tr className="print-table-total-row">
+                      <td colSpan="3" style={{ textAlign: 'right', fontWeight: 'bold', textTransform: 'uppercase', fontSize: '0.75rem', paddingRight: '12px' }}>
+                        {t('tableHeaderTotal')} ({t('expandedDetailTablePkg')} #{pkgNum}):
+                      </td>
+                      <td className="text-right text-mono font-bold" style={{ fontSize: '0.85rem' }}>
+                        {pkgTotalQty}
+                      </td>
+                      <td className="text-right text-mono font-bold" style={{ fontSize: '0.85rem' }}>
+                        {pkgTotalNetWeight.toFixed(3)} kg
+                      </td>
+                    </tr>
+                  </tfoot>
                 </table>
+
+                {/* Resumen de Pesos y Medidas: Peso Neto, Peso Bruto y Medidas */}
+                <div className="print-weights-summary-card">
+                  {/* Fila 1: Peso Neto */}
+                  <div className="weights-row net-row">
+                    <div className="weights-label-group">
+                      <span className="weights-label-main">{locale === 'pt' ? 'PESO LÍQUIDO DO VOLUME' : 'PESO NETO DEL BULTO'}</span>
+                    </div>
+                    <div className="weights-value-group">
+                      <strong className="weights-value text-mono">{pkgTotalNetWeight.toFixed(3)} kg</strong>
+                    </div>
+                  </div>
+
+                  {/* Fila 2: Peso Bruto debajo que ingresa el operador junto a las medidas */}
+                  <div className="weights-row gross-row">
+                    <div className="gross-left-col">
+                      <div className="weights-label-group">
+                        <span className="weights-label-main">{locale === 'pt' ? 'PESO BRUTO' : 'PESO BRUTO'}</span>
+                      </div>
+                      <strong className="weights-value text-mono" style={{ marginTop: '2px' }}>
+                        {grossWeight > 0 ? `${grossWeight.toFixed(3)} kg` : '0.000 kg'}
+                      </strong>
+                    </div>
+
+                    <div className="dims-right-col">
+                      <div className="weights-label-group" style={{ justifyContent: 'flex-end' }}>
+                        <span className="weights-label-main">{locale === 'pt' ? 'MEDIDAS DO VOLUME' : 'MEDIDAS DEL BULTO'}</span>
+                        <span className="weights-subtext">(L × A × A)</span>
+                      </div>
+                      <div className="dims-content text-mono" style={{ marginTop: '2px' }}>
+                        {hasDims ? (
+                          <>
+                            <strong>{length} × {width} × {height} cm</strong>
+                            {volumeDm3 && <span className="dims-volume-tag"> ({volumeDm3} dm³)</span>}
+                          </>
+                        ) : (
+                          <span className="text-muted italic">{locale === 'pt' ? 'Medidas não registradas' : 'Medidas no registradas'}</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
                 {/* Pie de Página de Firma / Autoría */}
                 <div className="print-footer">
@@ -262,8 +329,6 @@ const PackingListPrint = () => {
                       </span>
                     )}
                   </div>
-
-
                 </div>
               </div>
             );
@@ -474,7 +539,7 @@ const PackingListPrint = () => {
         .print-items-table {
           width: 100%;
           border-collapse: collapse;
-          margin-bottom: 1.5rem;
+          margin-bottom: 1rem;
         }
 
         .print-items-table th {
@@ -494,6 +559,92 @@ const PackingListPrint = () => {
 
         .print-items-table tr:last-child td {
           border-bottom: none;
+        }
+
+        .print-table-total-row td {
+          border-top: 1.5px solid #000 !important;
+          border-bottom: 1.5px solid #000 !important;
+          padding: 0.4rem 0 !important;
+          background-color: #fafafa;
+        }
+
+        /* Resumen de Pesos y Medidas */
+        .print-weights-summary-card {
+          margin-top: 0.75rem;
+          margin-bottom: 1.25rem;
+          border: 1.5px solid #000;
+          border-radius: 4px;
+          background-color: #fcfcfc;
+          padding: 0.65rem 0.9rem;
+        }
+
+        .weights-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .weights-row.net-row {
+          padding-bottom: 0.45rem;
+          margin-bottom: 0.45rem;
+          border-bottom: 1px dashed #aaa;
+        }
+
+        .weights-row.gross-row {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 1rem;
+          align-items: flex-start;
+        }
+
+        .weights-label-group {
+          display: flex;
+          align-items: baseline;
+          gap: 0.4rem;
+          flex-wrap: wrap;
+        }
+
+        .weights-label-main {
+          font-size: 0.75rem;
+          font-weight: 800;
+          letter-spacing: 0.04em;
+          text-transform: uppercase;
+          color: #111;
+        }
+
+        .weights-subtext {
+          font-size: 0.65rem;
+          color: #555;
+        }
+
+        .weights-value {
+          font-size: 0.95rem;
+          font-weight: 800;
+          color: #000;
+        }
+
+        .gross-left-col {
+          display: flex;
+          flex-direction: column;
+          gap: 0.15rem;
+        }
+
+        .dims-right-col {
+          display: flex;
+          flex-direction: column;
+          gap: 0.15rem;
+          text-align: right;
+        }
+
+        .dims-content {
+          font-size: 0.85rem;
+          color: #000;
+        }
+
+        .dims-volume-tag {
+          font-size: 0.75rem;
+          color: #444;
+          font-weight: normal;
         }
 
         .print-footer {
@@ -608,6 +759,25 @@ const PackingListPrint = () => {
           
           .print-items-table td {
             border-bottom: 0.5pt solid #ccc !important;
+          }
+
+          .print-table-total-row td {
+            border-top: 1.5pt solid #000 !important;
+            border-bottom: 1.5pt solid #000 !important;
+            background-color: transparent !important;
+          }
+
+          .print-weights-summary-card {
+            border: 1.5pt solid #000 !important;
+            background-color: transparent !important;
+            page-break-inside: avoid;
+            margin-top: 3mm !important;
+            margin-bottom: 4mm !important;
+            padding: 2.5mm 3.5mm !important;
+          }
+
+          .weights-row.net-row {
+            border-bottom: 1pt dashed #000 !important;
           }
         }
       `}} />

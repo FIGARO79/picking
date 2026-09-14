@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from '../context/LanguageContext';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import Spinner from '../components/Spinner';
+import '../styles/FluentPages.css';
 
 const Shipments = () => {
   const { t, locale } = useTranslation();
@@ -25,9 +27,7 @@ const Shipments = () => {
     setLoading(true);
     try {
       const res = await fetch('/api/shipments/', {
-        headers: {
-          'Accept-Language': locale
-        }
+        headers: { 'Accept-Language': locale }
       });
       if (!res.ok) throw new Error('Error al cargar envíos consolidados.');
       const data = await res.json();
@@ -93,43 +93,56 @@ const Shipments = () => {
   };
 
   return (
-    <div className="shipments-container">
+    <div className="shipments-page space-y-4 max-w-[1400px] mx-auto">
       <ToastContainer position="top-right" autoClose={3000} />
 
-      <div className="shipments-action-bar no-print">
-        <button onClick={fetchShipments} className="btn btn-secondary">
+      {/* Barra de Acciones */}
+      <div className="flex justify-between items-center bg-white p-3 rounded border border-[#c8c6c4] shadow-xs">
+        <div>
+          <span className="text-sm md:text-base font-bold uppercase tracking-wider text-[#111827]">
+            {t('menuShipments')}
+          </span>
+          <span className="text-sm text-[#374151] ml-2 font-medium">
+            ({shipments.length} envíos)
+          </span>
+        </div>
+
+        <button 
+          onClick={fetchShipments} 
+          className="rounded border border-[#c8c6c4] bg-white px-3.5 py-1.5 text-xs md:text-sm font-semibold text-[#374151] hover:bg-[#e5e7eb] hover:text-[#111827] transition-colors cursor-pointer"
+        >
           {t('syncBtn')}
         </button>
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-20">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-zinc-900"></div>
+        <div className="flex justify-center py-20 bg-white rounded border border-[#c8c6c4]">
+          <Spinner size="lg" label="Cargando envíos consolidados..." />
         </div>
       ) : shipments.length === 0 ? (
-        <div className="card text-center py-20 animate-fade-in" style={{ borderStyle: 'dashed' }}>
-          <h3 style={{ color: 'var(--text-light)', marginBottom: '0.5rem' }}>{t('emptyShipmentsTitle')}</h3>
-          <p>
+        <div className="bg-white rounded border border-[#c8c6c4] p-12 text-center shadow-xs">
+          <h3 className="text-sm font-bold uppercase text-[#374151] mb-1">{t('emptyShipmentsTitle')}</h3>
+          <p className="text-sm text-[#374151]">
             {t('emptyShipmentsDesc')}{' '}
-            <Link to="/view_picking_audits" style={{ color: 'var(--primary)', fontWeight: '600' }}>
+            <Link to="/view_picking_audits" className="text-[#0078d4] font-semibold hover:underline">
               {t('emptyShipmentsLink')}
             </Link>.
           </p>
         </div>
       ) : (
-        <div className="table-container shipments-table-container">
-          <table>
+        <div className="overflow-x-auto bg-white rounded border border-[#c8c6c4] shadow-xs">
+          <table className="w-full text-left sap-table">
             <thead>
-              <tr className="bg-zinc-900 text-white">
-                <th className="text-center" style={{ width: '40px' }}></th>
-                <th className="text-center">{t('tableHeaderShipment')}</th>
+              <tr>
+                <th className="text-center w-8"></th>
+                <th className="text-center w-20">{t('tableHeaderShipment')}</th>
                 <th className="text-center">{t('tableHeaderDate')}</th>
-                <th className="text-center" style={{ minWidth: '250px' }}>{t('tableHeaderCustomer')}</th>
-                <th className="text-center">{t('tableHeaderAuditor')}</th>
-                <th className="text-center">{t('tableHeaderCarrier')}</th>
-                <th className="text-center">{t('tableHeaderOrdersCount')}</th>
-                <th className="text-center">{t('tableHeaderStatus')}</th>
-                <th className="text-center">{t('tableHeaderActions')}</th>
+                <th>{t('tableHeaderCustomer')}</th>
+                <th>{t('tableHeaderAuditor')}</th>
+                <th>{t('tableHeaderCarrier')}</th>
+                <th className="text-center w-20">{t('tableHeaderOrdersCount')}</th>
+                <th className="text-center w-24">{t('tableHeaderStatus')}</th>
+                <th className="text-center w-28">{t('tableHeaderActions')}</th>
               </tr>
             </thead>
             <tbody>
@@ -140,50 +153,52 @@ const Shipments = () => {
                 return (
                   <React.Fragment key={s.id}>
                     <tr 
-                      className={`hoverable cursor-pointer ${isExpanded ? 'row-expanded' : ''} ${isCancelled ? 'row-cancelled' : ''}`}
+                      className={`hover:bg-[#f3f9fd] cursor-pointer ${isExpanded ? 'bg-[#eff6fc]' : ''} ${isCancelled ? 'bg-[#fee2e2]/40 opacity-75' : ''}`}
                       onClick={() => setExpandedId(isExpanded ? null : s.id)}
                     >
-                      <td className="text-center">
-                        <span className="expand-arrow">{isExpanded ? '▼' : '▶'}</span>
+                      <td className="text-center text-xs text-[#374151] font-bold">
+                        {isExpanded ? '▼' : '▶'}
                       </td>
-                      <td className="text-center text-mono">#{s.id}</td>
-                      <td className="text-center text-mono text-xs text-muted">{formatDate(s.created_at)}</td>
-                      <td className="truncate-cell" style={{ maxWidth: '300px' }}>
+                      <td className="text-center font-mono text-sm font-semibold text-[#374151]">#{s.id}</td>
+                      <td className="text-center font-mono text-sm text-[#374151]">{formatDate(s.created_at)}</td>
+                      <td className="text-sm truncate max-w-xs text-[#111827]">
                         {s.audits.length > 0 && (
                           <>
-                            <span className="text-muted">[{s.audits[0].customer_code}]</span> {s.audits[0].customer_name}
+                            <span className="text-[#374151] font-semibold">[{s.audits[0].customer_code}]</span> {s.audits[0].customer_name}
                             {s.audits.length > 1 && (
-                              <span className="pkg-more-badge">+{s.audits.length - 1}</span>
+                              <span className="ml-1 text-xs bg-[#e0f2fe] text-[#004e8c] font-bold px-1.5 py-0.5 rounded">
+                                +{s.audits.length - 1}
+                              </span>
                             )}
                           </>
                         )}
                       </td>
-                      <td className="text-center profile-cell">{s.username}</td>
-                      <td className="text-center"><strong>{s.carrier || '—'}</strong></td>
-                      <td className="text-center font-medium">
-                        <span className="orders-count-badge">{s.total_orders}</span>
+                      <td className="text-sm text-[#111827]">{s.username}</td>
+                      <td className="text-sm font-semibold text-[#111827]">{s.carrier || '—'}</td>
+                      <td className="text-center font-mono text-sm font-bold text-[#0078d4]">
+                        {s.total_orders}
                       </td>
                       <td className="text-center">
-                        <span className={`badge ${
-                          isCancelled ? 'badge-danger' : 'badge-success'
+                        <span className={`inline-block px-2.5 py-0.5 rounded text-xs font-bold uppercase ${
+                          isCancelled ? 'bg-[#fee2e2] text-[#8a1f24]' : 'bg-[#dcfce7] text-[#0e620e]'
                         }`}>
                           {isCancelled ? t('badgeCancelled') : t('badgeActive')}
                         </span>
                       </td>
                       <td className="text-center" onClick={(e) => e.stopPropagation()}>
-                        <div className="action-buttons">
+                        <div className="flex items-center justify-center gap-2.5 text-sm">
                           {!isCancelled && (
                             <>
                               <Link 
                                 to={`/packing_list/print/${s.id}?consolidated=true`}
-                                className="btn-action-text print"
+                                className="text-[#0078d4] hover:underline font-semibold"
                                 title="Ver e imprimir Packing List Consolidado"
                               >
                                 {t('btnPrint')}
                               </Link>
                               <button 
                                 onClick={() => handleEditClick(s)}
-                                className="btn-action-text edit"
+                                className="text-[#0078d4] hover:underline font-semibold cursor-pointer"
                                 title="Editar despacho"
                               >
                                 {t('btnEdit')}
@@ -194,37 +209,42 @@ const Shipments = () => {
                       </td>
                     </tr>
 
+                    {/* Fila Detalle Expandida */}
                     {isExpanded && (
-                      <tr className="expanded-detail-row">
-                        <td colSpan="9" className="expanded-detail-cell">
-                          <div className="expanded-card">
-                            <div className="expanded-card-header">
-                              <h4>{t('expandedShipmentTitle')} #{s.id}</h4>
+                      <tr className="bg-[#fafafa]">
+                        <td colSpan="9" className="p-4 border-b border-[#c8c6c4]">
+                          <div className="bg-white rounded border border-[#c8c6c4] p-4 shadow-xs">
+                            <div className="mb-3">
+                              <h4 className="text-sm font-bold uppercase tracking-wider text-[#111827]">
+                                {t('expandedShipmentTitle')} #{s.id}
+                              </h4>
                               {s.note && (
-                                <p className="shipment-notes-p">{t('expandedShipmentNote')}: <em>{s.note}</em></p>
+                                <p className="text-sm text-[#374151] mt-1 p-2.5 bg-[#f9f9f9] border-l-3 border-[#0078d4] rounded">
+                                  {t('expandedShipmentNote')}: <em>{s.note}</em>
+                                </p>
                               )}
                             </div>
                             
-                            <table>
+                            <table className="w-full text-left sap-table">
                               <thead>
                                 <tr>
-                                  <th>{t('expandedShipmentTableHeaderAudit')}</th>
+                                  <th className="w-16">{t('expandedShipmentTableHeaderAudit')}</th>
                                   <th>{t('expandedShipmentTableHeaderOrder')}</th>
-                                  <th>{t('expandedShipmentTableHeaderDespatch')}</th>
+                                  <th className="w-16 text-center">{t('expandedShipmentTableHeaderDespatch')}</th>
                                   <th>{t('expandedShipmentTableHeaderCustCode')}</th>
                                   <th>{t('expandedShipmentTableHeaderCustName')}</th>
-                                  <th className="text-center">{t('expandedShipmentTableHeaderPkgs')}</th>
+                                  <th className="text-center w-20">{t('expandedShipmentTableHeaderPkgs')}</th>
                                 </tr>
                               </thead>
                               <tbody>
                                 {s.audits.map((a, idx) => (
-                                  <tr key={idx}>
-                                    <td className="text-mono">#{a.audit_id}</td>
-                                    <td><strong>{a.order_number}</strong></td>
-                                    <td className="text-mono">{a.despatch_number}</td>
-                                    <td className="text-mono text-muted">{a.customer_code}</td>
-                                    <td className="sku-desc">{a.customer_name}</td>
-                                    <td className="text-center font-medium">{a.packages}</td>
+                                  <tr key={idx} className="hover:bg-[#f3f9fd]">
+                                    <td className="font-mono text-sm text-[#374151]">#{a.audit_id}</td>
+                                    <td><span className="font-mono font-bold text-[#111827] text-sm">{a.order_number}</span></td>
+                                    <td className="font-mono text-center text-sm text-[#374151]">{a.despatch_number}</td>
+                                    <td className="font-mono text-sm text-[#374151]">{a.customer_code}</td>
+                                    <td className="text-sm text-[#111827]">{a.customer_name}</td>
+                                    <td className="text-center font-mono text-sm font-bold text-[#111827]">{a.packages}</td>
                                   </tr>
                                 ))}
                               </tbody>
@@ -243,37 +263,36 @@ const Shipments = () => {
 
       {/* Modal de Edición de Consolidado */}
       {isEditModalOpen && editingShipment && (
-        <div className="modal-overlay">
-          <div className="modal-card animate-scale-in" style={{ maxWidth: '450px' }}>
-            <div className="modal-header" style={{ borderBottom: '1px solid #f1f5f9', paddingBottom: '0.75rem', marginBottom: '1.25rem' }}>
-              <h3 style={{ fontSize: '1.2rem', fontWeight: '700', color: 'var(--accent)' }}>
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded border border-[#c8c6c4] shadow-xl p-6 w-full max-w-md border-t-4 border-t-[#0078d4]">
+            <div className="flex justify-between items-center mb-3">
+              <h3 className="text-base font-bold uppercase text-[#111827]">
                 {locale === 'pt' ? 'Editar Envio Consolidado' : 'Editar Envío Consolidado'} #{editingShipment.id}
               </h3>
-              <button onClick={() => setIsEditModalOpen(false)} style={{ background: 'none', border: 'none', fontSize: '1.25rem', cursor: 'pointer', color: '#666' }}>✕</button>
+              <button onClick={() => setIsEditModalOpen(false)} className="text-base font-bold text-[#374151] hover:text-[#111827] cursor-pointer">✕</button>
             </div>
             
-            <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div className="input-group">
-                <label className="form-label" style={{ fontWeight: '600', marginBottom: '0.35rem' }}>
+            <div className="space-y-4 mb-5">
+              <div>
+                <label className="block text-xs md:text-sm font-bold uppercase text-[#111827] mb-1.5">
                   {t('carrierLabel')}
                 </label>
                 <input
                   type="text"
-                  className="form-control"
-                  style={{ width: '100%', height: '36px', padding: '0.5rem', border: '1px solid #ccc', borderRadius: '4px' }}
+                  className="w-full rounded border border-[#605e5c] p-2.5 text-sm font-medium text-[#111827] outline-none focus:border-[#0078d4]"
                   value={editCarrier}
                   onChange={(e) => setEditCarrier(e.target.value)}
                   placeholder={t('carrierPlaceholder')}
                 />
               </div>
               
-              <div className="input-group">
-                <label className="form-label" style={{ fontWeight: '600', marginBottom: '0.35rem' }}>
+              <div>
+                <label className="block text-xs md:text-sm font-bold uppercase text-[#111827] mb-1.5">
                   {t('notesLabel')}
                 </label>
                 <textarea
-                  className="form-control"
-                  style={{ width: '100%', minHeight: '80px', padding: '0.5rem', border: '1px solid #ccc', borderRadius: '4px', resize: 'vertical' }}
+                  className="w-full rounded border border-[#605e5c] p-2.5 text-sm font-medium text-[#111827] outline-none focus:border-[#0078d4]"
+                  rows={3}
                   value={editNote}
                   onChange={(e) => setEditNote(e.target.value)}
                   placeholder={t('notesPlaceholder')}
@@ -281,18 +300,17 @@ const Shipments = () => {
               </div>
             </div>
             
-            <div className="modal-footer" style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', borderTop: '1px solid #f1f5f9', paddingTop: '0.75rem' }}>
+            <div className="flex justify-end gap-2.5">
               <button 
                 onClick={() => setIsEditModalOpen(false)} 
-                className="btn btn-secondary"
+                className="rounded border border-[#c8c6c4] px-4 py-2 text-xs md:text-sm font-semibold text-[#374151] hover:bg-[#e5e7eb] hover:text-[#111827] cursor-pointer"
                 disabled={isSaving}
               >
                 {t('cancelBtn')}
               </button>
               <button 
                 onClick={handleSaveEdit} 
-                className="btn btn-primary"
-                style={{ backgroundColor: 'var(--primary)', color: 'white' }}
+                className="rounded bg-[#0078d4] px-5 py-2 text-xs md:text-sm font-bold uppercase text-white hover:bg-[#106ebe] transition-colors disabled:opacity-50 cursor-pointer shadow-xs"
                 disabled={isSaving}
               >
                 {isSaving ? (locale === 'pt' ? 'Salvando...' : 'Guardando...') : (locale === 'pt' ? 'Salvar Alterações' : 'Guardar Cambios')}
@@ -301,96 +319,6 @@ const Shipments = () => {
           </div>
         </div>
       )}
-
-      <style dangerouslySetInnerHTML={{
-        __html: `
-        .shipments-container {
-          display: flex;
-          flex-direction: column;
-          gap: 1.5rem;
-        }
-
-        .shipments-action-bar {
-          display: flex;
-          justify-content: flex-end;
-        }
-
-        .shipments-table-container {
-          border: 1px solid var(--border-color);
-          border-radius: var(--radius-md);
-        }
-
-        .text-center {
-          text-align: center;
-        }
-
-        .truncate-cell {
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
-
-        .row-expanded {
-          background-color: #f8fafc;
-        }
-
-        .row-cancelled {
-          background-color: #fef2f2;
-          opacity: 0.65;
-        }
-
-        .pkg-more-badge {
-          font-size: 0.6rem;
-          font-weight: 700;
-          background-color: var(--primary-light);
-          color: var(--primary);
-          padding: 0.15rem 0.4rem;
-          border-radius: 4px;
-          margin-left: 0.5rem;
-        }
-
-        .orders-count-badge {
-          background-color: #f1f5f9;
-          border: 1px solid var(--border-color);
-          padding: 0.15rem 0.5rem;
-          font-size: 0.8rem;
-          font-weight: 600;
-          border-radius: 4px;
-          color: var(--text-main);
-        }
-
-        .btn-action-text.delete {
-          color: var(--danger);
-        }
-
-        .btn-action-text.delete:hover {
-          color: #dc2626;
-        }
-
-        .expanded-card-header {
-          display: flex;
-          flex-direction: column;
-          gap: 0.35rem;
-          margin-bottom: 0.75rem;
-          border-bottom: 1px solid #f1f5f9;
-          padding-bottom: 0.5rem;
-        }
-
-        .expanded-card-header h4 {
-          border-bottom: none !important;
-          padding-bottom: 0 !important;
-          margin-bottom: 0 !important;
-        }
-
-        .shipment-notes-p {
-          font-size: 0.75rem;
-          color: var(--text-muted);
-          background-color: #f8fafc;
-          padding: 0.5rem 0.75rem;
-          border-radius: 4px;
-          border-left: 3px solid var(--primary);
-        }
-      `}} />
     </div>
   );
 };

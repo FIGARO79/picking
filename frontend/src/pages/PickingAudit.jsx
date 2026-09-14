@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import ScannerModal from '../components/ScannerModal';
 import DimensionScanner from '../components/DimensionScanner';
 import { useTranslation } from '../context/LanguageContext';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import '../styles/FluentPages.css';
 
 // Efectos de sonido utilizando Web Audio API nativo
 const playBeep = (freq, duration) => {
@@ -31,86 +32,22 @@ const playBeep = (freq, duration) => {
 const playSuccess = () => playBeep(800, 0.1);
 const playError = () => playBeep(220, 0.2);
 
-// Iconos SVG modernos y premium para mejorar la UI
-const ExitIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '6px' }}>
-    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-    <polyline points="16 17 21 12 16 7"></polyline>
-    <line x1="21" y1="12" x2="9" y2="12"></line>
-  </svg>
-);
-
-const MeasureIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M21.3 8.11 16.3 3.1a2 2 0 0 0-2.82 0L3.1 13.5a2 2 0 0 0 0 2.82l5 5a2 2 0 0 0 2.82 0L21.3 10.93a2 2 0 0 0 0-2.82Z"></path>
-    <line x1="8.5" y1="5.5" x2="10.5" y2="7.5"></line>
-    <line x1="11.5" y1="8.5" x2="13.5" y2="10.5"></line>
-    <line x1="14.5" y1="11.5" x2="16.5" y2="13.5"></line>
-  </svg>
-);
-
-const EditIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M12 20h9"></path>
-    <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-  </svg>
-);
-
-const QRIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="3" y="3" width="7" height="7"></rect>
-    <rect x="14" y="3" width="7" height="7"></rect>
-    <rect x="14" y="14" width="7" height="7"></rect>
-    <rect x="3" y="14" width="7" height="7"></rect>
-    <line x1="7" y1="7" x2="7" y2="7.01"></line>
-    <line x1="17" y1="7" x2="17" y2="7.01"></line>
-    <line x1="17" y1="17" x2="17" y2="17.01"></line>
-    <line x1="7" y1="17" x2="7" y2="17.01"></line>
-  </svg>
-);
-
-const ScannerIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '6px' }}>
-    <path d="M3 7V5a2 2 0 0 1 2-2h2"></path>
-    <path d="M17 3h2a2 2 0 0 1 2 2v2"></path>
-    <path d="M21 17v2a2 2 0 0 1-2 2h-2"></path>
-    <path d="M7 21H5a2 2 0 0 1-2-2v-2"></path>
-    <line x1="8" y1="6" x2="8" y2="18"></line>
-    <line x1="12" y1="6" x2="12" y2="18"></line>
-    <line x1="16" y1="6" x2="16" y2="18"></line>
-  </svg>
-);
-
-const SearchIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '6px' }}>
-    <circle cx="11" cy="11" r="8"></circle>
-    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-  </svg>
-);
-
-const PlusIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="12" y1="5" x2="12" y2="19"></line>
-    <line x1="5" y1="12" x2="19" y2="12"></line>
-  </svg>
-);
-
-const MinusIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="5" y1="12" x2="19" y2="12"></line>
-  </svg>
-);
-
-const PackageCheckIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '8px' }}>
-    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-    <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-    <line x1="12" y1="22.08" x2="12" y2="12"></line>
-  </svg>
-);
+const formatDateLabel = (dateStr) => {
+  if (!dateStr) return '';
+  const dateOnly = dateStr.split(' ')[0] || dateStr.split('T')[0];
+  const parts = dateOnly.split('-');
+  if (parts.length === 3) {
+    const year = parts[0];
+    const monthStr = parts[1];
+    const day = parseInt(parts[2], 10);
+    return `${day}/${monthStr}/${year}`;
+  }
+  return dateStr;
+};
 
 const PickingAudit = () => {
   const { t, locale } = useTranslation();
+
   // --- Estados de Búsqueda/Carga ---
   const [orderNumber, setOrderNumber] = useState('');
   const [despatchNumber, setDespatchNumber] = useState('');
@@ -118,6 +55,7 @@ const PickingAudit = () => {
   const [trackingData, setTrackingData] = useState([]);
   const [loadingTracking, setLoadingTracking] = useState(false);
   const [sortOrder, setSortOrder] = useState('desc');
+  const [selectedCustomerFilter, setSelectedCustomerFilter] = useState(null);
 
   // --- Estados de Auditoría en Curso ---
   const [auditActive, setAuditActive] = useState(false);
@@ -148,13 +86,105 @@ const PickingAudit = () => {
     };
   }, []);
 
+  // -- Cálculo de Matriz por Cliente y Fecha (Estilo Logix) --
+  const matrixData = useMemo(() => {
+    if (!trackingData || trackingData.length === 0) {
+      return { dates: [], rows: [], totals: {}, grandTotal: { orders: 0, lines: 0 } };
+    }
+
+    const datesSet = new Set();
+    trackingData.forEach(tRow => {
+      if (!tRow.print_date) return;
+      const datePart = tRow.print_date.split(' ')[0] || tRow.print_date.split('T')[0];
+      if (datePart) datesSet.add(datePart);
+    });
+    const sortedDates = Array.from(datesSet).sort();
+
+    const rowsMap = {};
+    trackingData.forEach(tRow => {
+      if (!tRow.print_date) return;
+      const datePart = tRow.print_date.split(' ')[0] || tRow.print_date.split('T')[0];
+      if (!datePart) return;
+
+      const custCode = tRow.customer_code || 'N/A';
+      const custName = tRow.customer_name || 'Desconocido';
+      const custKey = custCode;
+
+      if (!rowsMap[custKey]) {
+        rowsMap[custKey] = {
+          customerCode: custCode,
+          customerName: custName,
+          dates: {}
+        };
+      }
+
+      if (!rowsMap[custKey].dates[datePart]) {
+        rowsMap[custKey].dates[datePart] = { orders: 0, lines: 0 };
+      }
+
+      rowsMap[custKey].dates[datePart].orders += 1;
+      rowsMap[custKey].dates[datePart].lines += (parseInt(tRow.total_lines) || 0);
+    });
+
+    const rows = Object.values(rowsMap).map(row => {
+      let rowTotalOrders = 0;
+      let rowTotalLines = 0;
+      Object.values(row.dates).forEach(d => {
+        rowTotalOrders += d.orders;
+        rowTotalLines += d.lines;
+      });
+      return {
+        ...row,
+        totalOrders: rowTotalOrders,
+        totalLines: rowTotalLines
+      };
+    });
+
+    const totals = {};
+    sortedDates.forEach(d => {
+      totals[d] = { orders: 0, lines: 0 };
+    });
+
+    rows.forEach(row => {
+      sortedDates.forEach(d => {
+        const cellData = row.dates[d] || { orders: 0, lines: 0 };
+        totals[d].orders += cellData.orders;
+        totals[d].lines += cellData.lines;
+      });
+    });
+
+    let grandTotalOrders = 0;
+    let grandTotalLines = 0;
+    rows.forEach(row => {
+      grandTotalOrders += row.totalOrders;
+      grandTotalLines += row.totalLines;
+    });
+
+    return {
+      dates: sortedDates,
+      rows,
+      totals,
+      grandTotal: {
+        orders: grandTotalOrders,
+        lines: grandTotalLines
+      }
+    };
+  }, [trackingData]);
+
+  const toggleCustomerFilter = (custCode) => {
+    setSelectedCustomerFilter(prev => prev === custCode ? null : custCode);
+  };
+
+  const filteredTracking = useMemo(() => {
+    if (!selectedCustomerFilter) return trackingData;
+    return trackingData.filter(tRow => tRow.customer_code === selectedCustomerFilter);
+  }, [trackingData, selectedCustomerFilter]);
+
   const loadTrackingData = async () => {
     setLoadingTracking(true);
     try {
       const response = await fetch('/api/picking/tracking', {
-        headers: {
-          'Accept-Language': locale
-        }
+        headers: { 'Accept-Language': locale }
       });
       if (response.ok) {
         const data = await response.json();
@@ -176,9 +206,7 @@ const PickingAudit = () => {
     setLoadingOrder(true);
     try {
       const response = await fetch(`/api/picking/order/${orderNumber.trim()}/${despatchNumber.trim()}`, {
-        headers: {
-          'Accept-Language': locale
-        }
+        headers: { 'Accept-Language': locale }
       });
       if (!response.ok) {
         const err = await response.json();
@@ -190,18 +218,21 @@ const PickingAudit = () => {
         setCustomerCode(data[0]['Customer Code'] || 'N/A');
         setCustomerName(data[0]['Customer Name'] || 'N/A');
         
-        const items = data.map(row => ({
-          code: row['Item Code'],
-          description: row['Item Description'],
-          order_line: row['Order Line'],
-          qty_req: parseInt(row['Qty'] || 0),
-          qty_scan: 0,
-          difference: 0
-        }));
+        const items = data.map(row => {
+          const itemWeight = parseFloat(row['Item Weight'] || row['Item_Weight'] || row['item_weight'] || 0) || 0;
+          return {
+            code: row['Item Code'],
+            description: row['Item Description'],
+            order_line: row['Order Line'],
+            qty_req: parseInt(row['Qty'] || 0),
+            qty_scan: 0,
+            difference: 0,
+            item_weight: itemWeight
+          };
+        });
         
         setOrderItems(items);
 
-        // Inicializar asignaciones vacías
         const initialAssignments = {};
         items.forEach(item => {
           const itemKey = `${item.code}:${item.order_line || ''}`;
@@ -238,68 +269,58 @@ const PickingAudit = () => {
     loadTrackingData();
   };
 
-  // --- Lógica de Escaneo/Conteo ---
-
   const handleScan = (code) => {
     const cleanCode = code.trim().toUpperCase();
     if (!cleanCode) return;
 
-    // Buscar ítem disponible (primero no completados)
     let idx = orderItems.findIndex(i => i.code === cleanCode && i.qty_scan < i.qty_req);
     if (idx === -1) {
       idx = orderItems.findIndex(i => i.code === cleanCode);
     }
 
-    if (idx > -1) {
+    if (idx !== -1) {
       const item = orderItems[idx];
       setScannedItem({ ...item, index: idx });
       setTempQty(1);
       setShowQtyModal(true);
       setItemCodeInput('');
-      playSuccess();
       setScanError('');
+      playSuccess();
     } else {
       playError();
-      setItemCodeInput('');
-      setScanError(locale === 'pt' 
-        ? `O SKU '${cleanCode}' não pertence a este pedido.`
-        : `El SKU '${cleanCode}' no pertenece a este pedido.`
-      );
+      setScanError(`Artículo no encontrado: ${cleanCode}`);
       if (scanErrorTimeoutRef.current) clearTimeout(scanErrorTimeoutRef.current);
-      scanErrorTimeoutRef.current = setTimeout(() => {
-        setScanError('');
-      }, 6000);
+      scanErrorTimeoutRef.current = setTimeout(() => setScanError(''), 4000);
+      setItemCodeInput('');
     }
   };
 
   const confirmQuantity = () => {
     if (!scannedItem) return;
-    const qtyToAdd = parseInt(tempQty) || 0;
-    if (qtyToAdd <= 0) {
+
+    let toAdd = parseInt(tempQty) || 0;
+    if (toAdd <= 0) {
       setShowQtyModal(false);
       return;
     }
 
     const newItems = [...orderItems];
-    let remaining = qtyToAdd;
     const packageUpdates = {};
+    let remaining = toAdd;
 
-    // 1. Distribuir primero en las líneas que requieren cantidad
     for (let i = 0; i < newItems.length && remaining > 0; i++) {
       if (newItems[i].code === scannedItem.code && newItems[i].qty_scan < newItems[i].qty_req) {
         const needed = newItems[i].qty_req - newItems[i].qty_scan;
-        const toAdd = Math.min(needed, remaining);
-
-        newItems[i].qty_scan += toAdd;
+        const add = Math.min(needed, remaining);
+        newItems[i].qty_scan += add;
         newItems[i].difference = newItems[i].qty_scan - newItems[i].qty_req;
-        remaining -= toAdd;
+        remaining -= add;
 
         const itemKey = `${newItems[i].code}:${newItems[i].order_line || ''}`;
-        packageUpdates[itemKey] = (packageUpdates[itemKey] || 0) + toAdd;
+        packageUpdates[itemKey] = (packageUpdates[itemKey] || 0) + add;
       }
     }
 
-    // 2. Si sobra, asignar el exceso a la primera línea/índice del ítem escaneado
     if (remaining > 0) {
       const targetIdx = scannedItem.index;
       newItems[targetIdx].qty_scan += remaining;
@@ -311,7 +332,6 @@ const PickingAudit = () => {
 
     setOrderItems(newItems);
 
-    // Actualizar asignación al bulto activo
     setPackageAssignments(prev => {
       const next = { ...prev };
       Object.entries(packageUpdates).forEach(([itemKey, qty]) => {
@@ -327,15 +347,7 @@ const PickingAudit = () => {
 
     setShowQtyModal(false);
     setScannedItem(null);
-
-    // Alerta visual de exceso
-    const hasOver = newItems.some(i => i.qty_scan > i.qty_req);
-    if (hasOver) {
-      playError();
-      toast.warning("¡Exceso de cantidad detectado en uno o más ítems!");
-    } else {
-      toast.success("Cantidad asignada correctamente.");
-    }
+    toast.success("Cantidad asignada.");
   };
 
   const handleAssignmentChange = (itemKey, pkgNum, valStr) => {
@@ -349,7 +361,6 @@ const PickingAudit = () => {
         }
       };
 
-      // Recalcular qty_scan e items
       const [code, line] = itemKey.split(':');
       const newItems = [...orderItems];
       const idx = newItems.findIndex(i => i.code === code && (i.order_line || '') === line);
@@ -365,12 +376,7 @@ const PickingAudit = () => {
   };
 
   const handleFinalize = () => {
-    const hasDiff = orderItems.some(i => i.qty_scan !== i.qty_req);
-    if (hasDiff) {
-      setShowConfirmModal(true);
-    } else {
-      setShowAssignmentModal(true);
-    }
+    setShowAssignmentModal(true);
   };
 
   const submitAudit = async (statusOverride) => {
@@ -389,7 +395,8 @@ const PickingAudit = () => {
         description: i.description,
         order_line: i.order_line,
         qty_req: i.qty_req,
-        qty_scan: i.qty_scan
+        qty_scan: i.qty_scan,
+        item_weight: i.item_weight || 0
       })),
       packages: parseInt(packagesCount || 0),
       packages_assignment: packageAssignments,
@@ -411,7 +418,7 @@ const PickingAudit = () => {
 
       if (res.ok) {
         const data = await res.json();
-        toast.success(data.message || "Auditoría guardada con éxito en el servidor.");
+        toast.success(data.message || "Auditoría guardada con éxito.");
         handleReset();
         setShowConfirmModal(false);
         setShowAssignmentModal(false);
@@ -424,219 +431,241 @@ const PickingAudit = () => {
     }
   };
 
-  // --- Renderizado de Pantalla Activa ---
+  // --- RENDERIZADO DE PANTALLA ACTIVA ---
   if (auditActive) {
+    const totalScanWeight = orderItems.reduce((acc, i) => acc + ((i.item_weight || 0) * (i.qty_scan || 0)), 0);
+    const totalReqWeight = orderItems.reduce((acc, i) => acc + ((i.item_weight || 0) * (i.qty_req || 0)), 0);
+
     return (
-      <div className="audit-active-container">
+      <div className="picking-audit-page space-y-6 max-w-5xl mx-auto">
         <ToastContainer position="top-right" autoClose={3000} />
 
-        <div className="card audit-card">
-          <div className="audit-header">
-            <div className="audit-title-group">
-              <h2 className="audit-title">{t('activeAuditTitle')}</h2>
-              <div className="audit-metadata">
-                <span>{t('orderLabel')}: <strong>{orderNumber} / {despatchNumber}</strong></span>
-                <span>{t('customerLabel')}: <strong>{customerCode} - {customerName}</strong></span>
+        <div className="rounded border border-[#c8c6c4] bg-white p-6 shadow-xs">
+          {/* Cabecera de Auditoría */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-4 mb-4 border-b border-[#edebe9] gap-4">
+            <div>
+              <h2 className="text-lg font-bold uppercase tracking-wider text-[#111827]">
+                {t('activeAuditTitle')}
+              </h2>
+              <div className="flex flex-wrap gap-4 text-sm text-[#374151] mt-1.5 items-center">
+                <span>{t('orderLabel')}: <strong className="font-mono text-[#0078d4] font-bold text-base">{orderNumber} / {despatchNumber}</strong></span>
+                <span>{t('customerLabel')}: <strong className="text-[#111827]">{customerCode} - {customerName}</strong></span>
+                <span className="bg-[#eff6fc] px-2.5 py-1 rounded border border-[#c8c6c4] text-[#111827]">
+                  {t('totalWeightLabel')}: <strong className="font-mono text-[#0078d4] font-bold">{totalScanWeight.toFixed(3)} kg</strong>
+                </span>
               </div>
             </div>
-            <button onClick={handleReset} className="cancel-exit-btn">
+            <button
+              onClick={handleReset}
+              className="cursor-pointer rounded border border-[#c8c6c4] px-3.5 py-1.5 text-xs font-semibold uppercase text-[#374151] transition-all hover:bg-[#e5e7eb] hover:text-[#111827]"
+            >
               {t('exitBtn')}
             </button>
           </div>
 
-          {/* Selector de Bultos Activos */}
-          <div className="package-selector-bar">
-            <span className="selector-title">{t('activePkgLabel')}:</span>
-            <div className="package-buttons">
-              {Array.from({ length: parseInt(packagesCount) || 1 }).map((_, i) => (
-                <div key={i + 1} className="pkg-btn-wrapper">
-                  <button
-                    onClick={() => setActivePackage(i + 1)}
-                    className={`pkg-btn ${activePackage === i + 1 ? 'active' : ''}`}
-                  >
-                    {i + 1}
-                  </button>
-                  {activePackage === i + 1 && (
-                    <button 
-                       onClick={() => setDimensionScannerOpen(true)}
-                       className="pkg-measure-btn"
-                       title={t('dimTableBox')}
+          {/* Selector de Bulto Activo */}
+          <div className="mb-4 p-3.5 bg-[#f9f9f9] rounded border border-[#c8c6c4] flex items-center justify-between flex-wrap gap-3">
+            <div className="flex items-center gap-3">
+              <span className="text-xs uppercase font-bold text-[#374151]">
+                {t('activePkgLabel')}:
+              </span>
+              <div className="flex gap-2 flex-wrap items-center">
+                {Array.from({ length: parseInt(packagesCount) || 1 }).map((_, i) => (
+                  <div key={i + 1} className="relative">
+                    <button
+                      onClick={() => setActivePackage(i + 1)}
+                      className={`w-9 h-9 rounded-full font-bold text-sm transition-all cursor-pointer ${
+                        activePackage === i + 1
+                          ? 'bg-[#0078d4] text-white shadow-xs'
+                          : 'bg-white text-[#111827] border border-[#c8c6c4] hover:border-[#0078d4]'
+                      }`}
                     >
-                      <EditIcon />
+                      {i + 1}
+                    </button>
+                    {activePackage === i + 1 && (
+                      <button 
+                        onClick={() => setDimensionScannerOpen(true)}
+                        className="absolute -top-1 -right-1 bg-white border border-[#0078d4] rounded-full w-4 h-4 flex items-center justify-center text-[9px] text-[#0078d4] shadow-xs cursor-pointer hover:bg-[#eff6fc]"
+                        title={t('dimTableBox')}
+                      >
+                        ✎
+                      </button>
+                    )}
+                    {packageDimensions[i + 1] && (
+                      <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-2 h-2 rounded-full bg-[#0e620e] border border-white" />
+                    )}
+                  </div>
+                ))}
+
+                <div className="flex items-center gap-1.5 ml-2">
+                  {(parseInt(packagesCount) || 1) > 1 && (
+                    <button
+                      onClick={() => {
+                        const total = parseInt(packagesCount);
+                        let assigned = false;
+                        Object.values(packageAssignments).forEach(pkgs => {
+                          if (pkgs[total] > 0) assigned = true;
+                        });
+                        if (assigned) {
+                          toast.warning(`El bulto ${total} tiene artículos asignados.`);
+                          return;
+                        }
+                        const nextCount = total - 1;
+                        setPackagesCount(nextCount.toString());
+                        if (activePackage > nextCount) setActivePackage(nextCount);
+                      }}
+                      className="w-8 h-8 rounded-full border border-[#c8c6c4] bg-white text-[#8a1f24] text-sm font-bold hover:bg-[#fee2e2] flex items-center justify-center cursor-pointer"
+                      title={t('editModalRemovePkg')}
+                    >
+                      −
                     </button>
                   )}
-                  {packageDimensions[i + 1] && (
-                    <span className="pkg-has-dims" title="Medidas guardadas"></span>
-                  )}
-                </div>
-              ))}
-
-              <div className="pkg-controls">
-                {(parseInt(packagesCount) || 1) > 1 && (
                   <button
                     onClick={() => {
-                      const total = parseInt(packagesCount);
-                      // Verificar que no tenga ítems asignados
-                      let assigned = false;
-                      Object.values(packageAssignments).forEach(pkgs => {
-                        if (pkgs[total] > 0) assigned = true;
-                      });
-                      if (assigned) {
-                        toast.warning(`El bulto ${total} tiene artículos. Redistribúyelos primero.`);
-                        return;
-                      }
-                      const nextCount = total - 1;
+                      const nextCount = (parseInt(packagesCount) || 1) + 1;
                       setPackagesCount(nextCount.toString());
-                      if (activePackage > nextCount) setActivePackage(nextCount);
-                    }}
-                    className="pkg-control-btn remove"
-                    title={t('editModalRemovePkg')}
-                  >
-                    <MinusIcon />
-                  </button>
-                )}
-                <button
-                  onClick={() => {
-                    const nextCount = (parseInt(packagesCount) || 1) + 1;
-                    setPackagesCount(nextCount.toString());
-                    setActivePackage(nextCount);
-                    setPackageAssignments(prev => {
-                      const updated = { ...prev };
-                      Object.keys(updated).forEach(k => {
-                        updated[k] = { ...updated[k], [nextCount]: 0 };
+                      setActivePackage(nextCount);
+                      setPackageAssignments(prev => {
+                        const updated = { ...prev };
+                        Object.keys(updated).forEach(k => {
+                          updated[k] = { ...updated[k], [nextCount]: 0 };
+                        });
+                        return updated;
                       });
-                      return updated;
-                    });
-                  }}
-                  className="pkg-control-btn add"
-                  title={t('editModalAddPkg')}
-                >
-                  <PlusIcon />
-                </button>
+                    }}
+                    className="w-8 h-8 rounded-full border border-[#0078d4] bg-white text-[#0078d4] text-sm font-bold hover:bg-[#eff6fc] flex items-center justify-center cursor-pointer"
+                    title={t('editModalAddPkg')}
+                  >
+                    +
+                  </button>
+                </div>
               </div>
             </div>
-            <div className="pkg-info-text">
-              {t('pkgAssigningText')} <em>{activePackage}.</em>
-            </div>
+
+            <span className="text-sm text-[#374151]">
+              {t('pkgAssigningText')} <strong className="text-[#0078d4] font-bold">Bulto {activePackage}</strong>
+            </span>
           </div>
 
+          {/* Banner de error de escaneo */}
           {scanError && (
-            <div className="scan-error-banner" style={{
-              backgroundColor: '#fdebfa',
-              borderLeft: '4px solid var(--danger)',
-              padding: '0.75rem 1rem',
-              borderRadius: '4px',
-              marginBottom: '1rem',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
-              animation: 'slideDown 0.25s ease-out'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ fontSize: '0.9rem', color: '#8b0000', fontWeight: '600' }}>{scanError}</span>
-              </div>
-              <button 
-                onClick={() => setScanError('')} 
-                style={{ 
-                  background: 'none', 
-                  border: 'none', 
-                  color: '#8b0000', 
-                  fontSize: '1rem', 
-                  cursor: 'pointer',
-                  padding: '0 4px',
-                  fontWeight: 'bold'
-                }}
-              >
-                ✕
-              </button>
+            <div className="bg-[#fee2e2] border-l-4 border-[#8a1f24] text-[#8a1f24] px-4 py-2.5 rounded text-sm mb-4 flex justify-between items-center font-medium">
+              <span>{scanError}</span>
+              <button onClick={() => setScanError('')} className="font-bold text-base cursor-pointer">✕</button>
             </div>
           )}
 
-          {/* Campo de Escaneo Activo */}
-          <div className="scan-bar">
-            <div className="scan-input-container">
-              <label className="form-label">{t('scanInputLabel')}</label>
-              <div className="scan-input-wrapper">
-                <input
-                  type="text"
-                  value={itemCodeInput}
-                  onChange={(e) => setItemCodeInput(e.target.value.toUpperCase())}
-                  placeholder={t('scanPlaceholder')}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      handleScan(itemCodeInput);
-                    }
-                  }}
-                  autoFocus
-                />
-                <button onClick={() => setScannerOpen(true)} className="scan-trigger-btn">
-                  <QRIcon />
-                </button>
-                <button onClick={() => handleScan(itemCodeInput)} className="btn btn-primary scan-search-btn">
-                  {t('searchBtn')}
-                </button>
-              </div>
+          {/* Barra de Entrada de Escaneo */}
+          <div className="mb-4">
+            <label className="block text-xs md:text-sm font-bold uppercase tracking-wider text-[#111827] mb-1.5">
+              {t('scanInputLabel')}
+            </label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={itemCodeInput}
+                onChange={(e) => setItemCodeInput(e.target.value.toUpperCase())}
+                placeholder={t('scanPlaceholder')}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleScan(itemCodeInput);
+                  }
+                }}
+                autoFocus
+                className="flex-grow rounded border border-[#605e5c] px-3.5 py-2 text-base font-mono text-[#111827] outline-none focus:border-[#0078d4] focus:ring-1 focus:ring-[#0078d4]"
+              />
+              <button
+                onClick={() => setScannerOpen(true)}
+                className="rounded border border-[#c8c6c4] bg-white px-3.5 py-2 text-xs font-semibold text-[#374151] hover:bg-[#e5e7eb] cursor-pointer"
+                title="Cámara / Scanner"
+              >
+                QR
+              </button>
+              <button
+                onClick={() => handleScan(itemCodeInput)}
+                className="rounded bg-[#0078d4] px-5 py-2 text-xs md:text-sm font-bold uppercase text-white hover:bg-[#106ebe] transition-colors cursor-pointer shadow-xs"
+              >
+                {t('searchBtn')}
+              </button>
             </div>
           </div>
 
-          {/* Tabla de Artículos de la Orden */}
-          <div className="table-container audit-items-table">
-            <table>
+          {/* Tabla de Artículos */}
+          <div className="overflow-x-auto border border-[#c8c6c4] rounded mb-6">
+            <table className="w-full text-left sap-table">
               <thead>
                 <tr>
-                  <th className="text-center" style={{ width: '60px' }}>{t('tableHeaderLine')}</th>
+                  <th className="text-center w-14">{t('tableHeaderLine')}</th>
                   <th>{t('tableHeaderItem')}</th>
                   <th>{t('tableHeaderDesc')}</th>
-                  <th className="text-center" style={{ width: '80px' }}>{t('tableHeaderReq')}</th>
-                  <th className="text-center" style={{ width: '80px' }}>{t('tableHeaderScan')}</th>
-                  <th className="text-center" style={{ width: '80px' }}>{t('tableHeaderDiff')}</th>
+                  <th className="text-center w-28">{t('tableHeaderScan')}</th>
+                  <th className="text-center w-36">{t('tableHeaderWeight')}</th>
                 </tr>
               </thead>
               <tbody>
-                {orderItems.filter(item => item.qty_scan > 0).map((item, idx) => {
+                {orderItems.map((item, idx) => {
                   const itemKey = `${item.code}:${item.order_line || ''}`;
-                  const diff = item.qty_scan - item.qty_req;
-                  const isOk = item.qty_scan === item.qty_req;
-                  const isExcess = item.qty_scan > item.qty_req;
+                  const lineWeight = (item.item_weight || 0) * (item.qty_scan || 0);
 
                   return (
                     <tr 
                       key={idx} 
-                      className={`hoverable ${isOk ? 'row-complete' : isExcess ? 'row-excess' : ''}`}
+                      className={`hover:bg-[#f3f9fd] ${item.qty_scan > 0 ? 'bg-[#f0fdf4]/30' : ''}`}
                     >
-                      <td className="text-center text-mono text-muted">{item.order_line}</td>
+                      <td className="text-center font-mono text-sm font-medium text-[#374151]">{item.order_line}</td>
                       <td>
-                        <span className="sku-code">{item.code}</span>
-                        <div className="pkg-distributions">
+                        <span className="font-mono font-bold text-[#111827] text-sm">{item.code}</span>
+                        <div className="flex gap-1.5 flex-wrap mt-0.5">
                           {Object.entries(packageAssignments[itemKey] || {})
                             .filter(([_, q]) => q > 0)
                             .map(([pNum, q]) => (
-                              <span key={pNum} className="pkg-dist-badge">B{pNum}: {q}</span>
+                              <span key={pNum} className="text-xs bg-[#f3f4f6] border border-[#c8c6c4] px-1.5 py-0.5 rounded text-[#374151] font-semibold">
+                                B{pNum}: {q}
+                              </span>
                             ))
                           }
                         </div>
                       </td>
-                      <td className="sku-desc">{item.description}</td>
-                      <td className="text-center text-mono">{item.qty_req}</td>
-                      <td className="text-center text-mono font-medium">{item.qty_scan}</td>
-                      <td className={`text-center text-mono font-medium ${diff === 0 ? 'text-success' : 'text-danger'}`}>
-                        {diff > 0 ? `+${diff}` : diff}
+                      <td className="text-sm text-[#111827] max-w-xs truncate" title={item.description}>
+                        {item.description}
+                      </td>
+                      <td className="text-center font-mono text-sm font-bold text-[#111827]">{item.qty_scan}</td>
+                      <td className="text-center font-mono text-sm font-bold text-[#111827]">
+                        {lineWeight.toFixed(3)} kg
                       </td>
                     </tr>
                   );
                 })}
               </tbody>
+              <tfoot>
+                <tr className="bg-[#f3f4f6] font-bold border-t-2 border-[#c8c6c4]">
+                  <td colSpan="3" className="text-right text-xs uppercase text-[#374151] px-4 py-2.5 font-bold">
+                    {t('tableHeaderTotal') || 'TOTALES'}:
+                  </td>
+                  <td className="text-center font-mono text-sm text-[#111827]">
+                    {orderItems.reduce((sum, i) => sum + (i.qty_scan || 0), 0)}
+                  </td>
+                  <td className="text-center font-mono text-sm text-[#0078d4] font-bold">
+                    {totalScanWeight.toFixed(3)} kg
+                  </td>
+                </tr>
+              </tfoot>
             </table>
           </div>
 
-          <button onClick={handleFinalize} className="btn btn-primary finalize-audit-btn">
-            {t('finalizeBtn')}
-          </button>
+          {/* Botón Finalizar */}
+          <div className="flex justify-end">
+            <button
+              onClick={handleFinalize}
+              className="w-full sm:w-auto rounded bg-[#0078d4] px-6 py-2.5 text-xs md:text-sm font-bold uppercase tracking-wider text-white hover:bg-[#106ebe] transition-colors cursor-pointer shadow-xs"
+            >
+              {t('finalizeBtn')}
+            </button>
+          </div>
         </div>
 
-        {/* Modales Flotantes de la Auditoría */}
+        {/* Modales Flotantes */}
         {scannerOpen && (
           <ScannerModal
             title={t('scanInputLabel')}
@@ -664,141 +693,158 @@ const PickingAudit = () => {
           />
         )}
 
+        {/* Modal de Cantidad */}
         {showQtyModal && scannedItem && (
-          <div className="modal-overlay">
-            <div className="modal-content qty-modal">
-              <div className="modal-header">
-                <h3>{t('qtyModalTitle')}: {scannedItem.code}</h3>
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded border border-[#c8c6c4] shadow-xl p-6 w-full max-w-sm border-t-4 border-t-[#0078d4]">
+              <h3 className="text-base font-bold uppercase text-[#111827] mb-1">
+                {t('qtyModalTitle')}: <span className="font-mono text-[#0078d4] font-bold">{scannedItem.code}</span>
+              </h3>
+              <p className="text-sm text-[#374151] mb-3 truncate">{scannedItem.description}</p>
+              
+              <div className="bg-[#f9f9f9] border border-[#c8c6c4] p-3 rounded mb-4 text-sm flex items-center justify-between">
+                <span>{t('tableHeaderLine')}: <strong className="font-mono text-[#111827]">{scannedItem.order_line}</strong></span>
               </div>
-              <div className="modal-body">
-                <p className="qty-item-desc">{scannedItem.description}</p>
-                <div className="qty-stats">
-                  <span>{t('tableHeaderLine')}: <strong>{scannedItem.order_line}</strong></span>
-                  <span>{t('tableHeaderScan')}: <strong>{scannedItem.qty_scan} / {scannedItem.qty_req}</strong></span>
-                </div>
-                
-                <div className="qty-input-group">
-                  <label className="form-label text-center">{t('qtyModalSub')}</label>
-                  <input
-                    type="number"
-                    min="1"
-                    value={tempQty}
-                    onChange={(e) => setTempQty(e.target.value)}
-                    className="qty-main-input"
-                    onFocus={(e) => e.target.select()}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') confirmQuantity();
-                      if (e.key === 'Escape') setShowQtyModal(false);
-                    }}
-                    autoFocus
-                  />
-                </div>
 
-                <div className="modal-actions">
-                  <button onClick={() => setShowQtyModal(false)} className="btn btn-secondary">
-                    {t('cancelBtn')}
-                  </button>
-                  <button onClick={confirmQuantity} className="btn btn-primary">
-                    {t('qtyModalSub')}
-                  </button>
-                </div>
+              <div className="mb-4">
+                <label className="block text-center text-xs md:text-sm font-bold uppercase text-[#111827] mb-1.5">
+                  {t('qtyModalSub')}
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  value={tempQty}
+                  onChange={(e) => setTempQty(e.target.value)}
+                  className="w-full text-center text-3xl font-mono font-bold rounded border border-[#605e5c] py-2.5 focus:border-[#0078d4] outline-none text-[#111827]"
+                  onFocus={(e) => e.target.select()}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') confirmQuantity();
+                    if (e.key === 'Escape') setShowQtyModal(false);
+                  }}
+                  autoFocus
+                />
+              </div>
+
+              <div className="flex justify-end gap-2.5">
+                <button 
+                  onClick={() => setShowQtyModal(false)}
+                  className="rounded border border-[#c8c6c4] px-4 py-2 text-xs md:text-sm font-semibold text-[#374151] hover:bg-[#e5e7eb] hover:text-[#111827] cursor-pointer"
+                >
+                  {t('cancelBtn')}
+                </button>
+                <button
+                  onClick={confirmQuantity}
+                  className="rounded bg-[#0078d4] px-5 py-2 text-xs md:text-sm font-bold uppercase text-white hover:bg-[#106ebe] cursor-pointer shadow-xs"
+                >
+                  {t('qtyModalSub')}
+                </button>
               </div>
             </div>
           </div>
         )}
 
-        {/* Modal de Diferencias */}
+        {/* Modal Confirmación de Diferencias */}
         {showConfirmModal && (
-          <div className="modal-overlay">
-            <div className="modal-content diff-confirm-modal">
-              <div className="modal-header">
-                <h3>{t('diffModalTitle')}</h3>
-              </div>
-              <div className="modal-body">
-                <p className="diff-alert-text">{t('diffModalDesc')}</p>
-                <div className="modal-actions">
-                  <button onClick={() => setShowConfirmModal(false)} className="btn btn-secondary">
-                    {t('diffGoBackBtn')}
-                  </button>
-                  <button 
-                    onClick={() => {
-                      setShowConfirmModal(false);
-                      setShowAssignmentModal(true);
-                    }} 
-                    className="btn btn-danger"
-                  >
-                    {t('diffContinueBtn')}
-                  </button>
-                </div>
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded border border-[#c8c6c4] shadow-xl p-6 w-full max-w-sm border-t-4 border-t-[#8a3b07]">
+              <h3 className="text-base font-bold uppercase text-[#8a3b07] mb-2">
+                {t('diffModalTitle')}
+              </h3>
+              <p className="text-sm text-[#111827] mb-4 leading-relaxed">
+                {t('diffModalDesc')}
+              </p>
+              <div className="flex justify-end gap-2.5">
+                <button
+                  onClick={() => setShowConfirmModal(false)}
+                  className="rounded border border-[#c8c6c4] px-4 py-2 text-xs md:text-sm font-semibold text-[#374151] hover:bg-[#e5e7eb] hover:text-[#111827] cursor-pointer"
+                >
+                  {t('diffGoBackBtn')}
+                </button>
+                <button
+                  onClick={() => {
+                    setShowConfirmModal(false);
+                    setShowAssignmentModal(true);
+                  }}
+                  className="rounded bg-[#8a3b07] px-5 py-2 text-xs md:text-sm font-bold uppercase text-white hover:bg-[#723005] cursor-pointer shadow-xs"
+                >
+                  {t('diffContinueBtn')}
+                </button>
               </div>
             </div>
           </div>
         )}
 
-        {/* Modal de Asignación Final de Bultos */}
+        {/* Modal de Distribución en Bultos */}
         {showAssignmentModal && (
-          <div className="modal-overlay">
-            <div className="modal-content assignment-modal">
-              <div className="modal-header">
-                <h3>{t('assignModalTitle')}</h3>
-                <button onClick={() => setShowAssignmentModal(false)} className="close-btn">✕</button>
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-xs z-[60] flex items-center justify-center p-4">
+            <div className="bg-white rounded border border-[#c8c6c4] shadow-xl p-6 w-full max-w-3xl max-h-[90vh] overflow-y-auto border-t-4 border-t-[#0078d4]">
+              <div className="flex justify-between items-center mb-3">
+                <h3 className="text-base font-bold uppercase text-[#111827]">
+                  {t('assignModalTitle')}
+                </h3>
+                <button onClick={() => setShowAssignmentModal(false)} className="text-base font-bold text-[#374151] hover:text-[#111827] cursor-pointer">✕</button>
               </div>
-              <div className="modal-body">
-                <p className="assign-desc">{t('assignModalDesc')}</p>
-                
-                <div className="assignment-table-container">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th style={{ width: '60px' }}>{t('tableHeaderLine')}</th>
-                        <th>{t('tableHeaderItem')}</th>
-                        <th className="text-center" style={{ width: '80px' }}>{t('assignTableHeaderTotal')}</th>
-                        {Array.from({ length: parseInt(packagesCount) || 1 }).map((_, i) => (
-                          <th key={i} className="text-center" style={{ width: '80px' }}>{t('assignTableHeaderPkg')} {i + 1}</th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {orderItems.filter(item => item.qty_scan > 0).map((item, idx) => {
-                        const itemKey = `${item.code}:${item.order_line || ''}`;
-                        const assignments = packageAssignments[itemKey] || {};
-                        const totalAssigned = Object.values(assignments).reduce((sum, q) => sum + q, 0);
+              <p className="text-sm text-[#374151] mb-4">
+                {t('assignModalDesc')}
+              </p>
 
-                        return (
-                          <tr key={idx}>
-                            <td className="text-mono text-muted">{item.order_line}</td>
-                            <td>
-                              <span className="sku-code">{item.code}</span>
-                              <div className="sku-desc text-xs" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '200px' }}>{item.description}</div>
+              <div className="overflow-x-auto border border-[#c8c6c4] rounded mb-4">
+                <table className="w-full text-sm sap-table">
+                  <thead>
+                    <tr>
+                      <th className="w-14 text-center">{t('tableHeaderLine')}</th>
+                      <th>{t('tableHeaderItem')}</th>
+                      <th className="text-center w-24">{t('assignTableHeaderTotal')}</th>
+                      {Array.from({ length: parseInt(packagesCount) || 1 }).map((_, i) => (
+                        <th key={i} className="text-center w-24">{t('assignTableHeaderPkg')} {i + 1}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {orderItems.filter(item => item.qty_scan > 0).map((item, idx) => {
+                      const itemKey = `${item.code}:${item.order_line || ''}`;
+                      const assignments = packageAssignments[itemKey] || {};
+
+                      return (
+                        <tr key={idx} className="hover:bg-[#f3f9fd]">
+                          <td className="text-center font-mono font-medium text-[#374151]">{item.order_line}</td>
+                          <td>
+                            <span className="font-mono font-bold text-[#111827] text-sm">{item.code}</span>
+                            <div className="text-xs text-[#374151] truncate max-w-xs">{item.description}</div>
+                          </td>
+                          <td className="text-center font-mono font-bold text-sm text-[#111827]">{item.qty_scan}</td>
+                          {Array.from({ length: parseInt(packagesCount) || 1 }).map((_, i) => (
+                            <td key={i} className="text-center py-1.5">
+                              <input
+                                type="number"
+                                min="0"
+                                className="w-16 text-center rounded border border-[#605e5c] py-1 text-sm font-mono font-bold text-[#111827]"
+                                value={assignments[i + 1] || 0}
+                                onChange={(e) => handleAssignmentChange(itemKey, i + 1, e.target.value)}
+                                onFocus={(e) => e.target.select()}
+                              />
                             </td>
-                            <td className="text-center text-mono font-medium">{item.qty_scan}</td>
-                            {Array.from({ length: parseInt(packagesCount) || 1 }).map((_, i) => (
-                              <td key={i} className="text-center">
-                                <input
-                                  type="number"
-                                  min="0"
-                                  className="assignment-pkg-input"
-                                  value={assignments[i + 1] || 0}
-                                  onChange={(e) => handleAssignmentChange(itemKey, i + 1, e.target.value)}
-                                  onFocus={(e) => e.target.select()}
-                                />
-                              </td>
-                            ))}
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
+                          ))}
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
 
-                <div className="modal-actions">
-                  <button onClick={() => setShowAssignmentModal(false)} className="btn btn-secondary">
-                    {t('cancelBtn')}
-                  </button>
-                  <button onClick={() => submitAudit()} className="btn btn-success" style={{ backgroundColor: 'var(--success)', color: 'white' }}>
-                    {t('saveAndFinalizeBtn')}
-                  </button>
-                </div>
+              <div className="flex justify-end gap-2.5">
+                <button
+                  onClick={() => setShowAssignmentModal(false)}
+                  className="rounded border border-[#c8c6c4] px-4 py-2 text-xs md:text-sm font-semibold text-[#374151] hover:bg-[#e5e7eb] hover:text-[#111827] cursor-pointer"
+                >
+                  {t('cancelBtn')}
+                </button>
+                <button
+                  onClick={() => submitAudit()}
+                  className="rounded bg-[#0e620e] px-5 py-2 text-xs md:text-sm font-bold uppercase text-white hover:bg-[#0b4d0b] cursor-pointer shadow-xs"
+                >
+                  {t('saveAndFinalizeBtn')}
+                </button>
               </div>
             </div>
           </div>
@@ -807,60 +853,76 @@ const PickingAudit = () => {
     );
   }
 
-  {/* --- Renderizado de Carga de Pedido / Seguimiento --- */}
+  // --- RENDERIZADO DE CARGA DE PEDIDO / SEGUIMIENTO (Estilo Logix) ---
   return (
-    <div className="picking-audit-container">
+    <div className="picking-audit-page space-y-6">
       <ToastContainer position="top-right" autoClose={3000} />
 
-      <div className="picking-loader-grid">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Widget de Carga Directa */}
-        <div className="card load-order-card">
-          <h3>{t('loadAuditTitle')}</h3>
-          <p className="card-subtitle">{t('loadAuditDesc')}</p>
+        <div className="lg:col-span-4 rounded border border-[#c8c6c4] bg-white p-6 shadow-xs">
+          <h3 className="text-sm md:text-base font-bold uppercase tracking-wider text-[#111827] mb-1">
+            {t('loadAuditTitle')}
+          </h3>
+          <p className="text-sm text-[#374151] mb-5">
+            {t('loadAuditDesc')}
+          </p>
 
-          <div className="form-grid">
-            <div className="input-group">
-              <label className="form-label">{t('orderInputLabel')}</label>
+          <div className="space-y-4 mb-5">
+            <div>
+              <label className="block text-xs md:text-sm font-bold uppercase tracking-wider text-[#111827] mb-1.5">
+                {t('orderInputLabel')}
+              </label>
               <input
                 type="text"
                 value={orderNumber}
                 onChange={(e) => setOrderNumber(e.target.value)}
                 placeholder="Ej: 0045628"
                 onKeyDown={(e) => e.key === 'Enter' && handleLoadOrder()}
+                className="w-full rounded border border-[#605e5c] p-2.5 text-sm font-mono text-[#111827] outline-none focus:border-[#0078d4] focus:ring-1 focus:ring-[#0078d4]"
               />
             </div>
-            <div className="input-group">
-              <label className="form-label">{t('despatchInputLabel')}</label>
+            <div>
+              <label className="block text-xs md:text-sm font-bold uppercase tracking-wider text-[#111827] mb-1.5">
+                {t('despatchInputLabel')}
+              </label>
               <input
                 type="text"
                 value={despatchNumber}
                 onChange={(e) => setDespatchNumber(e.target.value)}
                 placeholder="Ej: 00"
                 onKeyDown={(e) => e.key === 'Enter' && handleLoadOrder()}
+                className="w-full rounded border border-[#605e5c] p-2.5 text-sm font-mono text-[#111827] outline-none focus:border-[#0078d4] focus:ring-1 focus:ring-[#0078d4]"
               />
             </div>
           </div>
 
           <button 
             onClick={handleLoadOrder} 
-            className="btn btn-primary load-btn"
             disabled={loadingOrder}
+            className="w-full rounded bg-[#0078d4] py-2.5 text-xs md:text-sm font-bold uppercase tracking-wider text-white hover:bg-[#106ebe] transition-colors disabled:opacity-50 cursor-pointer shadow-xs"
           >
             {loadingOrder ? t('loadingAuditBtn') : t('startAuditBtn')}
           </button>
         </div>
 
-        {/* Tabla de Seguimiento de Pedidos del CSV */}
-        <div className="card tracking-card">
-          <div className="tracking-header">
-            <h3>{t('recentOrdersTitle')}</h3>
-            <button onClick={loadTrackingData} className="btn-refresh" disabled={loadingTracking}>
+        {/* Tabla de Seguimiento de Pedidos Recientes */}
+        <div className="lg:col-span-8 rounded border border-[#c8c6c4] bg-white p-6 shadow-xs">
+          <div className="flex justify-between items-center mb-3">
+            <h3 className="text-sm md:text-base font-bold uppercase tracking-wider text-[#111827]">
+              {t('recentOrdersTitle')}
+            </h3>
+            <button 
+              onClick={loadTrackingData} 
+              disabled={loadingTracking}
+              className="rounded border border-[#c8c6c4] bg-white px-3 py-1.5 text-xs font-semibold text-[#374151] hover:bg-[#e5e7eb] hover:text-[#111827] cursor-pointer"
+            >
               {t('updateBtn')}
             </button>
           </div>
 
-          <div className="table-container tracking-table">
-            <table>
+          <div className="overflow-x-auto border border-[#c8c6c4] rounded max-h-[380px] overflow-y-auto">
+            <table className="w-full text-left sap-table">
               <thead>
                 <tr>
                   <th>{t('orderLabel')}</th>
@@ -868,7 +930,7 @@ const PickingAudit = () => {
                   <th>{t('customerLabel')}</th>
                   <th className="text-center">{t('tableHeaderLine')}s</th>
                   <th 
-                    className="sortable" 
+                    className="cursor-pointer select-none" 
                     onClick={() => setSortOrder(prev => prev === 'desc' ? 'asc' : 'desc')}
                   >
                     {t('tableHeaderDate')} {sortOrder === 'asc' ? '▲' : '▼'}
@@ -877,11 +939,11 @@ const PickingAudit = () => {
               </thead>
               <tbody>
                 {loadingTracking ? (
-                  <tr><td colSpan="5" className="text-center py-8 text-muted">{t('loadingAuditBtn')}</td></tr>
-                ) : trackingData.length === 0 ? (
-                  <tr><td colSpan="5" className="text-center py-8 text-muted">{t('auditsTableEmpty')}</td></tr>
+                  <tr><td colSpan="5" className="text-center py-6 text-sm text-[#374151]">{t('loadingAuditBtn')}</td></tr>
+                ) : filteredTracking.length === 0 ? (
+                  <tr><td colSpan="5" className="text-center py-6 text-sm text-[#374151]">{t('auditsTableEmpty')}</td></tr>
                 ) : (
-                  [...trackingData]
+                  [...filteredTracking]
                     .sort((a, b) => {
                       const dateA = new Date(a.print_date);
                       const dateB = new Date(b.print_date);
@@ -890,7 +952,7 @@ const PickingAudit = () => {
                     .map((tRow, idx) => (
                       <tr 
                         key={idx} 
-                        className={`hoverable cursor-pointer ${tRow.is_audited ? 'row-audited' : ''}`}
+                        className={`cursor-pointer hover:bg-[#f3f9fd] ${tRow.is_audited ? 'bg-[#f0f0f0] opacity-75' : ''}`}
                         onClick={() => {
                           setOrderNumber(tRow.order_number);
                           setDespatchNumber(tRow.despatch_number);
@@ -898,17 +960,21 @@ const PickingAudit = () => {
                         }}
                       >
                         <td>
-                          <div className="order-cell">
-                            <strong>{tRow.order_number}</strong>
-                            {tRow.is_audited && <span className="audited-badge">AUDITADO</span>}
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono font-bold text-[#111827] text-sm">{tRow.order_number}</span>
+                            {tRow.is_audited && (
+                              <span className="bg-slate-200 text-slate-800 text-xs font-semibold px-1.5 py-0.5 rounded uppercase">
+                                Auditado
+                              </span>
+                            )}
                           </div>
                         </td>
-                        <td className="text-mono">{tRow.despatch_number}</td>
-                        <td className="truncate-cell" title={`${tRow.customer_code} - ${tRow.customer_name}`}>
-                          <span className="text-muted">[{tRow.customer_code}]</span> {tRow.customer_name}
+                        <td className="font-mono text-sm text-[#374151]">{tRow.despatch_number}</td>
+                        <td className="max-w-[220px] truncate text-sm text-[#111827]" title={`${tRow.customer_code} - ${tRow.customer_name}`}>
+                          <span className="text-[#374151] font-medium">[{tRow.customer_code}]</span> {tRow.customer_name}
                         </td>
-                        <td className="text-center font-medium">{tRow.total_lines}</td>
-                        <td className="text-mono text-xs text-muted">{tRow.print_date}</td>
+                        <td className="text-center font-mono font-bold text-[#0078d4] text-sm">{tRow.total_lines}</td>
+                        <td className="font-mono text-sm text-[#374151]">{tRow.print_date}</td>
                       </tr>
                     ))
                 )}
@@ -918,583 +984,137 @@ const PickingAudit = () => {
         </div>
       </div>
 
-      <style dangerouslySetInnerHTML={{
-        __html: `
-        .picking-audit-container {
-          display: flex;
-          flex-direction: column;
-          gap: 2rem;
-        }
-
-        .picking-loader-grid {
-          display: grid;
-          grid-template-columns: 1fr;
-          gap: 2rem;
-        }
-
-        @media (min-width: 1024px) {
-          .picking-loader-grid {
-            grid-template-columns: 380px 1fr;
-          }
-        }
-
-        .load-order-card {
-          padding: 1.75rem;
-          height: fit-content;
-        }
-
-        .load-order-card h3 {
-          margin-bottom: 0.25rem;
-        }
-
-        .card-subtitle {
-          font-size: 0.8rem;
-          color: var(--text-muted);
-          margin-bottom: 1.5rem;
-        }
-
-        .form-grid {
-          display: flex;
-          flex-direction: column;
-          gap: 1.25rem;
-          margin-bottom: 1.5rem;
-        }
-
-        .load-btn {
-          width: 100%;
-          height: 44px;
-          font-weight: 600;
-        }
-
-        .tracking-card {
-          padding: 1.75rem;
-          display: flex;
-          flex-direction: column;
-        }
-
-        .tracking-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 1.25rem;
-        }
-
-        .btn-refresh {
-          background: transparent;
-          border: 1px solid var(--border-color);
-          padding: 0.35rem 0.75rem;
-          font-size: 0.75rem;
-          font-weight: 600;
-          border-radius: var(--radius-sm);
-          color: var(--text-muted);
-          cursor: pointer;
-          transition: var(--transition-fast);
-        }
-
-        .btn-refresh:hover {
-          background: #f8fafc;
-          color: var(--text-main);
-          border-color: #cbd5e1;
-        }
-
-        .tracking-table {
-          max-height: 480px;
-          overflow-y: auto;
-          border: 1px solid var(--border-color);
-          border-radius: var(--radius-sm);
-        }
-
-        .order-cell {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-        }
-
-        .audited-badge {
-          background-color: #e2e8f0;
-          color: var(--text-muted);
-          font-size: 0.55rem;
-          font-weight: 700;
-          padding: 0.1rem 0.3rem;
-          border-radius: 3px;
-        }
-
-        .row-audited {
-          background-color: #f8fafc;
-          opacity: 0.75;
-        }
-
-        .sortable {
-          cursor: pointer;
-          user-select: none;
-        }
-
-        .sortable:hover {
-          color: var(--primary);
-        }
-
-        .truncate-cell {
-          max-width: 250px;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
-
-        /* ESTILOS DE AUDITORÍA ACTIVA */
-        .audit-active-container {
-          max-width: 1000px;
-          margin: 0 auto;
-          width: 100%;
-        }
-
-        .audit-card {
-          padding: 2rem;
-          background-color: var(--bg-card);
-          border: 1px solid var(--border-color);
-          border-radius: var(--radius-md);
-        }
-
-        .audit-header {
-          display: flex !important;
-          flex-direction: row !important;
-          justify-content: space-between !important;
-          align-items: center !important;
-          border-bottom: 1.5px solid #edf2f7;
-          padding-bottom: 1.25rem;
-          margin-bottom: 1.5rem;
-          gap: 1rem !important;
-        }
-
-        .audit-title-group {
-          display: flex;
-          flex-direction: column;
-          gap: 0.25rem;
-        }
-
-        .audit-title {
-          font-size: 1.5rem;
-          font-weight: 600;
-          color: #1e293b;
-          margin: 0;
-        }
-
-        .audit-metadata {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 1rem;
-          font-size: 0.85rem;
-          color: #475569;
-        }
-
-        .cancel-exit-btn {
-          height: 40px !important;
-          background-color: white !important;
-          border: 1.5px solid #285f94 !important;
-          color: #285f94 !important;
-          border-radius: var(--radius-sm) !important;
-          font-weight: 600 !important;
-          padding: 0 1.25rem !important;
-          display: inline-flex !important;
-          align-items: center !important;
-          justify-content: center !important;
-          transition: all 0.2s ease !important;
-          flex-shrink: 0 !important;
-          margin: 0 !important;
-          box-shadow: none !important;
-          transform: none !important;
-        }
-
-        .cancel-exit-btn:hover {
-          background-color: #285f94 !important;
-          color: white !important;
-        }
-
-        .package-selector-bar {
-          background-color: #f8fafc;
-          border: 1px solid #e2e8f0;
-          border-radius: var(--radius-lg);
-          padding: 0.85rem 1.5rem;
-          margin-bottom: 1.5rem;
-          display: flex !important;
-          flex-direction: row !important;
-          align-items: center !important;
-          gap: 1rem !important;
-          flex-wrap: wrap !important;
-        }
-
-        .selector-title {
-          font-size: 0.8rem;
-          font-weight: 700;
-          color: #64748b;
-          letter-spacing: 0.05em;
-          margin-right: 0.5rem;
-        }
-
-        .package-buttons {
-          display: flex !important;
-          flex-direction: row !important;
-          align-items: center !important;
-          gap: 0.75rem !important;
-        }
-
-        .pkg-btn-wrapper {
-          position: relative;
-          padding: 4px;
-        }
-
-        .pkg-btn {
-          width: 32px;
-          height: 32px;
-          border-radius: 50%;
-          background-color: white;
-          border: 1.5px solid #285f94;
-          color: #285f94;
-          font-weight: 600;
-          font-size: 0.85rem;
-          cursor: pointer;
-          transition: var(--transition-fast);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-
-        .pkg-btn:hover {
-          background-color: #f1f5f9;
-          transform: scale(1.05);
-        }
-
-        .pkg-btn.active {
-          background-color: #1e4a74;
-          border-color: #1e4a74;
-          color: white;
-        }
-
-        .pkg-measure-btn {
-          position: absolute;
-          top: -3px;
-          right: -10px;
-          background-color: white;
-          border: 1.2px solid #285f94;
-          width: 24px;
-          height: 14px;
-          border-radius: 9999px;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          box-shadow: var(--shadow-sm);
-          transition: var(--transition-fast);
-          z-index: 5;
-          padding: 0;
-          color: #285f94;
-        }
-
-        .pkg-measure-btn:hover {
-          transform: scale(1.1);
-          background-color: #e8eff6;
-        }
-
-        .pkg-measure-btn svg {
-          width: 8px;
-          height: 8px;
-        }
-
-        .pkg-has-dims {
-          position: absolute;
-          bottom: -2px;
-          left: 50%;
-          transform: translateX(-50%);
-          width: 5px;
-          height: 5px;
-          border-radius: 50%;
-          background-color: var(--success);
-          border: 1px solid white;
-        }
-
-        .pkg-controls {
-          display: flex !important;
-          flex-direction: row !important;
-          gap: 0.5rem !important;
-        }
-
-        .pkg-control-btn {
-          width: 32px;
-          height: 32px;
-          border-radius: 50%;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          transition: var(--transition-fast);
-          border: 1.5px solid #285f94;
-          background-color: white;
-          color: #285f94;
-        }
-
-        .pkg-control-btn:hover {
-          transform: scale(1.05);
-          background-color: #e8eff6;
-        }
-
-        .pkg-control-btn.remove {
-          border-color: #fca3a3;
-          background-color: #fef2f2;
-          color: var(--danger);
-        }
-
-        .pkg-control-btn.remove:hover {
-          background-color: var(--danger);
-          color: white;
-          border-color: var(--danger);
-        }
-
-        .pkg-info-text {
-          font-size: 0.85rem;
-          color: #64748b;
-          margin-left: auto;
-        }
-
-        .pkg-info-text em {
-          font-weight: 600;
-          font-style: italic;
-        }
-
-        .scan-bar {
-          margin-bottom: 1.5rem;
-          width: 100%;
-        }
-
-        .scan-input-container {
-          display: flex;
-          flex-direction: column;
-          width: 100%;
-        }
-
-        .scan-input-container label {
-          font-size: 0.8rem;
-          font-weight: 700;
-          color: #64748b;
-          margin-bottom: 0.5rem;
-        }
-
-        .scan-input-wrapper {
-          display: grid !important;
-          grid-template-columns: 1fr 44px auto !important;
-          gap: 0.5rem !important;
-          align-items: center !important;
-          width: 100% !important;
-        }
-
-        .scan-input-wrapper input {
-          width: 100% !important;
-          height: 44px !important;
-          font-family: var(--font-mono);
-          font-size: 1rem;
-          font-weight: 500;
-          border-radius: var(--radius-sm) !important;
-          border: 1px solid #cbd5e1 !important;
-          padding: 0 1rem !important;
-          margin: 0 !important;
-          min-width: 0 !important;
-        }
-
-        .scan-input-wrapper input::placeholder {
-          color: #94a3b8;
-        }
-
-        .scan-trigger-btn, .scan-search-btn {
-          height: 44px !important;
-          display: inline-flex !important;
-          align-items: center !important;
-          justify-content: center !important;
-          font-size: 0.875rem !important;
-          font-weight: 600 !important;
-          border-radius: var(--radius-sm) !important;
-          border: 1.5px solid #285f94 !important;
-          background-color: white !important;
-          color: #285f94 !important;
-          cursor: pointer !important;
-          transition: all 0.2s ease !important;
-          margin: 0 !important;
-        }
-
-        .scan-trigger-btn {
-          width: 44px !important;
-          padding: 0 !important;
-        }
-
-        .scan-search-btn {
-          padding: 0 1.25rem !important;
-        }
-
-        .scan-trigger-btn:hover, .scan-search-btn:hover {
-          background-color: #285f94 !important;
-          color: white !important;
-        }
-
-        .audit-items-table {
-          margin-bottom: 1.5rem;
-          max-height: 440px;
-          overflow-y: auto;
-        }
-
-        .audit-items-table th {
-          background-color: #3a5370 !important;
-          color: white !important;
-          font-weight: 600;
-          font-size: 0.75rem;
-          letter-spacing: 0.05em;
-        }
-
-        .row-complete {
-          background-color: #f0fdf4;
-        }
-
-        .row-excess {
-          background-color: #fef2f2;
-        }
-
-        .sku-code {
-          font-weight: 600;
-          font-family: var(--font-mono);
-          color: var(--accent);
-        }
-
-        .pkg-distributions {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 0.25rem;
-          margin-top: 0.25rem;
-        }
-
-        .pkg-dist-badge {
-          font-size: 0.65rem;
-          font-weight: 600;
-          background-color: #f1f5f9;
-          border: 1px solid var(--border-color);
-          padding: 0.05rem 0.3rem;
-          border-radius: 4px;
-          color: var(--text-muted);
-        }
-
-        .finalize-audit-btn {
-          width: 100%;
-          height: 48px;
-          font-size: 1rem;
-          font-weight: 600;
-          border-radius: var(--radius-sm);
-          background-color: #285f94;
-          border: none;
-          color: white;
-          cursor: pointer;
-          transition: var(--transition-normal);
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          box-shadow: none;
-        }
-
-        .finalize-audit-btn:hover {
-          background-color: #1e4a74;
-        }
-
-        .finalize-audit-btn:active {
-          transform: translateY(1px);
-        }
-
-        .audit-header .btn-secondary {
-          border-color: rgba(239, 68, 68, 0.2) !important;
-          color: var(--danger) !important;
-          background-color: #fef2f2 !important;
-          font-weight: 600 !important;
-          transition: var(--transition-fast) !important;
-          display: inline-flex !important;
-          align-items: center !important;
-          justify-content: center !important;
-        }
-
-        .audit-header .btn-secondary:hover {
-          background-color: var(--danger) !important;
-          color: white !important;
-          border-color: var(--danger) !important;
-        }
-
-
-        /* ESTILOS DE MODALES INTERNOS */
-        .qty-modal {
-          max-width: 360px;
-          border-top: 4px solid var(--primary);
-        }
-
-        .qty-item-desc {
-          font-size: 0.8rem;
-          color: var(--text-muted);
-          margin-bottom: 1rem;
-        }
-
-        .qty-stats {
-          display: flex;
-          justify-content: space-between;
-          font-size: 0.8rem;
-          background-color: #f8fafc;
-          padding: 0.75rem;
-          border-radius: var(--radius-sm);
-          margin-bottom: 1.5rem;
-          border: 1px solid var(--border-color);
-        }
-
-        .qty-input-group {
-          margin-bottom: 1.5rem;
-        }
-
-        .qty-main-input {
-          text-align: center;
-          font-size: 1.75rem !important;
-          font-weight: 600 !important;
-          height: 60px !important;
-          border: 2px solid var(--primary) !important;
-          border-radius: var(--radius-sm) !important;
-        }
-
-        .diff-confirm-modal {
-          max-width: 380px;
-          border-top: 4px solid var(--danger);
-        }
-
-        .diff-alert-text {
-          font-size: 0.875rem;
-          color: var(--text-main);
-          margin-bottom: 1.5rem;
-          line-height: 1.5;
-        }
-
-        .assignment-modal {
-          max-width: 720px;
-        }
-
-        .assign-desc {
-          font-size: 0.8rem;
-          color: var(--text-muted);
-          margin-bottom: 1.25rem;
-        }
-
-        .assignment-table-container {
-          max-height: 300px;
-          overflow-y: auto;
-          border: 1px solid var(--border-color);
-          border-radius: var(--radius-sm);
-          margin-bottom: 1.5rem;
-        }
-
-        .assignment-pkg-input {
-          width: 64px;
-          height: 32px !important;
-          text-align: center;
-          font-size: 0.85rem !important;
-          font-weight: 600 !important;
-          padding: 0 !important;
-        }
-      `}} />
+      {/* Matriz de Resumen por Cliente y Fecha (Exacta como en Logix) */}
+      <div className="rounded border border-[#c8c6c4] bg-white p-6 shadow-xs">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm md:text-base font-bold uppercase tracking-wider text-[#111827]">
+            Resumen por Cliente y Fecha
+          </h3>
+          {selectedCustomerFilter && (
+            <button
+              onClick={() => setSelectedCustomerFilter(null)}
+              className="text-xs font-semibold text-[#0078d4] hover:underline cursor-pointer"
+            >
+              Limpiar filtro ({selectedCustomerFilter})
+            </button>
+          )}
+        </div>
+
+        {matrixData.dates.length === 0 ? (
+          <div className="text-center py-6 text-sm text-[#374151] bg-[#f9f9f9] rounded border border-[#c8c6c4]">
+            No hay información disponible para generar la matriz
+          </div>
+        ) : (
+          <div className="overflow-x-auto border border-[#c8c6c4] rounded max-h-[480px]">
+            <table className="w-full text-left text-sm sap-table border-collapse min-w-[750px]">
+              <thead>
+                <tr>
+                  <th className="py-1.5 px-2.5 border-b border-r border-[#c8c6c4]" style={{ background: '#f3f4f6', position: 'sticky', top: 0, zIndex: 12 }}>
+                    Fecha
+                  </th>
+                  {matrixData.dates.map(date => (
+                    <th
+                      key={date}
+                      className="py-1.5 px-2 text-center border-b border-r border-[#c8c6c4]"
+                      colSpan={2}
+                      style={{ background: '#f3f4f6', position: 'sticky', top: 0, zIndex: 12 }}
+                    >
+                      {formatDateLabel(date)}
+                    </th>
+                  ))}
+                  <th
+                    className="py-1.5 px-2 text-center border-b border-r border-[#c8c6c4]"
+                    colSpan={2}
+                    style={{ background: '#f3f4f6', position: 'sticky', top: 0, zIndex: 12 }}
+                  >
+                    Total General
+                  </th>
+                </tr>
+                <tr>
+                  <th className="py-1.5 px-2.5 border-b border-r border-[#c8c6c4] text-xs font-bold uppercase" style={{ background: '#f3f4f6', position: 'sticky', top: '33px', zIndex: 12 }}>
+                    Cliente
+                  </th>
+                  {matrixData.dates.map(date => (
+                    <React.Fragment key={date}>
+                      <th className="py-1 px-2 text-center border-b border-r border-[#c8c6c4] text-xs font-bold uppercase w-16" style={{ background: '#f3f4f6', position: 'sticky', top: '33px', zIndex: 12 }}>
+                        Ped
+                      </th>
+                      <th className="py-1 px-2 text-center border-b border-r border-[#c8c6c4] text-xs font-bold uppercase w-16" style={{ background: '#f3f4f6', position: 'sticky', top: '33px', zIndex: 12 }}>
+                        Lín
+                      </th>
+                    </React.Fragment>
+                  ))}
+                  <th className="py-1 px-2 text-center border-b border-r border-[#c8c6c4] text-xs font-bold uppercase w-16" style={{ background: '#f3f4f6', position: 'sticky', top: '33px', zIndex: 12 }}>
+                    Ped
+                  </th>
+                  <th className="py-1 px-2 text-center border-b border-r border-[#c8c6c4] text-xs font-bold uppercase w-16" style={{ background: '#f3f4f6', position: 'sticky', top: '33px', zIndex: 12 }}>
+                    Lín
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {matrixData.rows.map((row) => {
+                  const isFiltered = selectedCustomerFilter === row.customerCode;
+                  return (
+                    <tr
+                      key={row.customerCode}
+                      className={`border-b hover:bg-[#f3f9fd] cursor-pointer ${isFiltered ? 'bg-[#eff6fc]' : ''}`}
+                      onClick={() => toggleCustomerFilter(row.customerCode)}
+                    >
+                      <td className="py-1.5 px-2.5 border-r border-[#c8c6c4]">
+                        <span className="font-bold text-[#111827] text-sm">{row.customerCode}</span>
+                        <span className="text-[#374151] text-xs ml-1.5 truncate max-w-[150px] inline-block align-bottom">{row.customerName}</span>
+                      </td>
+                      {matrixData.dates.map(date => {
+                        const cell = row.dates[date];
+                        return (
+                          <React.Fragment key={date}>
+                            <td className="py-1 px-2 text-center border-r border-[#c8c6c4] font-mono text-sm text-[#111827]">
+                              {cell ? cell.orders : '-'}
+                            </td>
+                            <td className="py-1 px-2 text-center border-r border-[#c8c6c4] font-mono font-bold text-[#0078d4] text-sm">
+                              {cell ? cell.lines : '-'}
+                            </td>
+                          </React.Fragment>
+                        );
+                      })}
+                      <td className="py-1 px-2 text-center border-r border-[#c8c6c4] font-mono font-bold text-sm bg-[#fafafa] text-[#111827]">
+                        {row.totalOrders}
+                      </td>
+                      <td className="py-1 px-2 text-center border-r border-[#c8c6c4] font-mono font-bold text-sm text-[#0078d4] bg-[#fafafa]">
+                        {row.totalLines}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+              <tfoot>
+                <tr className="bg-[#f3f4f6] font-bold border-t-2 border-[#c8c6c4]">
+                  <td className="py-2 px-2.5 border-r border-[#c8c6c4] text-right uppercase text-xs font-bold text-[#111827]">
+                    Totales:
+                  </td>
+                  {matrixData.dates.map(date => (
+                    <React.Fragment key={date}>
+                      <td className="py-2 px-2 text-center border-r border-[#c8c6c4] font-mono text-sm font-bold text-[#111827]">
+                        {matrixData.totals[date]?.orders || 0}
+                      </td>
+                      <td className="py-2 px-2 text-center border-r border-[#c8c6c4] font-mono font-bold text-sm text-[#0078d4]">
+                        {matrixData.totals[date]?.lines || 0}
+                      </td>
+                    </React.Fragment>
+                  ))}
+                  <td className="py-2 px-2 text-center border-r border-[#c8c6c4] font-mono text-sm font-bold text-[#111827]">
+                    {matrixData.grandTotal.orders}
+                  </td>
+                  <td className="py-2 px-2 text-center border-r border-[#c8c6c4] font-mono text-sm font-bold text-[#0078d4]">
+                    {matrixData.grandTotal.lines}
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from '../context/LanguageContext';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import Spinner from '../components/Spinner';
+import '../styles/FluentPages.css';
 
 const PickingAuditHistory = () => {
   const { t, locale } = useTranslation();
@@ -23,13 +25,33 @@ const PickingAuditHistory = () => {
   const [creatingShipment, setCreatingShipment] = useState(false);
   const [exporting, setExporting] = useState(false);
 
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    fetchAudits();
+  }, []);
+
+  const fetchAudits = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/views/view_picking_audits', {
+        headers: { 'Accept-Language': locale }
+      });
+      if (!res.ok) throw new Error('Error al cargar historial.');
+      const data = await res.json();
+      setAudits(data || []);
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleExportExcel = async () => {
     setExporting(true);
     try {
       const res = await fetch('/api/export/picking_audits', {
-        headers: {
-          'Accept-Language': locale
-        }
+        headers: { 'Accept-Language': locale }
       });
       if (!res.ok) throw new Error('Error al exportar a Excel.');
       
@@ -60,29 +82,6 @@ const PickingAuditHistory = () => {
     }
   };
 
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    fetchAudits();
-  }, []);
-
-  const fetchAudits = async () => {
-    try {
-      const res = await fetch('/api/views/view_picking_audits', {
-        headers: {
-          'Accept-Language': locale
-        }
-      });
-      if (!res.ok) throw new Error('Error al cargar historial.');
-      const data = await res.json();
-      setAudits(data || []);
-    } catch (err) {
-      toast.error(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const toggleExpand = (id) => {
     setExpandedAuditId(expandedAuditId === id ? null : id);
   };
@@ -110,16 +109,13 @@ const PickingAuditHistory = () => {
     }
   };
 
-  // --- Lógica de Edición en Caliente ---
-
+  // --- Edición en Caliente ---
   const handleEditClick = async (audit) => {
     try {
       const res = await fetch(`/api/picking_audit/${audit.id}`, {
-        headers: {
-          'Accept-Language': locale
-        }
+        headers: { 'Accept-Language': locale }
       });
-      if (!res.ok) throw new Error("No se pudo cargar el detalle de la auditoría.");
+      if (!res.ok) throw new Error("No se pudo cargar el detalle.");
       const data = await res.json();
       setEditingAudit(data);
       setIsEditModalOpen(true);
@@ -138,8 +134,6 @@ const PickingAuditHistory = () => {
     if (!updated.packages_assignment[key]) updated.packages_assignment[key] = {};
 
     updated.packages_assignment[key][pkgNum] = qty;
-    
-    // Recalcular total escaneado para el artículo
     item.qty_scan = Object.values(updated.packages_assignment[key]).reduce((a, b) => a + b, 0);
     setEditingAudit(updated);
   };
@@ -155,7 +149,6 @@ const PickingAuditHistory = () => {
     if (editingAudit.packages <= 1) return;
     const lastPkg = editingAudit.packages.toString();
     
-    // Validar si tiene ítems
     let hasItems = false;
     if (editingAudit.packages_assignment) {
       Object.values(editingAudit.packages_assignment).forEach(pkgs => {
@@ -189,7 +182,8 @@ const PickingAuditHistory = () => {
           description: i.description,
           order_line: i.order_line || '',
           qty_req: i.qty_req,
-          qty_scan: i.qty_scan
+          qty_scan: i.qty_scan,
+          item_weight: i.item_weight || 0
         })),
         packages: editingAudit.packages,
         packages_assignment: editingAudit.packages_assignment,
@@ -220,8 +214,6 @@ const PickingAuditHistory = () => {
       setIsSubmitting(false);
     }
   };
-
-  // --- Lógica de Selección y Consolidación ---
 
   const toggleSelect = (id) => {
     setSelectedIds(prev => {
@@ -270,44 +262,55 @@ const PickingAuditHistory = () => {
   };
 
   return (
-    <div className="history-container">
+    <div className="picking-audit-history-page space-y-4 max-w-[1400px] mx-auto">
       <ToastContainer position="top-right" autoClose={3000} />
 
+      {/* Toolbar */}
+      <div className="flex justify-between items-center bg-white p-3 rounded border border-[#d2d0ce] shadow-xs">
+        <div>
+          <span className="text-sm md:text-base font-bold uppercase tracking-wider text-[#111827]">
+            {t('menuHistory')}
+          </span>
+          <span className="text-sm text-[#374151] ml-2 font-medium">
+            ({audits.length} registros)
+          </span>
+        </div>
+
+        <button 
+          onClick={handleExportExcel} 
+          disabled={exporting}
+          className="inline-flex items-center gap-1.5 rounded border border-[#0e620e] bg-white px-3.5 py-1.5 text-xs md:text-sm font-semibold text-[#0e620e] hover:bg-[#dcfce7] transition-colors cursor-pointer"
+        >
+          {exporting ? t('editModalSaving') : t('exportExcelBtn')}
+        </button>
+      </div>
+
       {loading ? (
-        <div className="flex justify-center py-20">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-zinc-900"></div>
+        <div className="flex justify-center py-20 bg-white rounded border border-[#c8c6c4]">
+          <Spinner size="lg" label="Cargando historial de auditorías..." />
         </div>
       ) : audits.length === 0 ? (
-        <div className="card text-center py-20" style={{ borderStyle: 'dashed' }}>
-          <h3 style={{ color: 'var(--text-light)', marginBottom: '0.5rem' }}>{t('emptyHistoryTitle')}</h3>
-          <p>{t('emptyHistoryDesc')}</p>
+        <div className="bg-white rounded border border-[#c8c6c4] p-12 text-center shadow-xs">
+          <h3 className="text-sm font-bold uppercase text-[#374151] mb-1">{t('emptyHistoryTitle')}</h3>
+          <p className="text-sm text-[#374151]">{t('emptyHistoryDesc')}</p>
         </div>
       ) : (
-        <>
-          <div className="history-toolbar no-print">
-            <span className="history-subtitle">{t('historyMainSubtitle')}</span>
-            <button 
-              onClick={handleExportExcel} 
-              className="btn btn-secondary btn-export-excel"
-              disabled={exporting}
-            >
-              {exporting ? t('editModalSaving') : t('exportExcelBtn')}
-            </button>
-          </div>
-          <div className="table-container history-table-container">
-          <table>
+        <div className="overflow-x-auto bg-white rounded border border-[#c8c6c4] shadow-xs">
+          <table className="w-full text-left sap-table">
             <thead>
-              <tr className="bg-zinc-50 border-b border-zinc-200">
-                <th className="text-center" style={{ width: '50px' }}>{t('tableHeaderShipment')}</th>
-                <th className="text-center" style={{ width: '40px' }}></th>
-                <th className="text-center">{t('tableHeaderId')}</th>
-                <th className="text-center">{t('tableHeaderOrder')}</th>
-                <th className="text-center" style={{ width: '80px' }}>{t('tableHeaderDespatch')}</th>
-                <th className="text-center" style={{ minWidth: '250px' }}>{t('tableHeaderCustomer')}</th>
-                <th className="text-center">{t('tableHeaderAuditor')}</th>
+              <tr>
+                <th className="text-center w-10"></th>
+                <th className="text-center w-8"></th>
+                <th className="text-center w-16">{t('tableHeaderId')}</th>
+                <th>{t('tableHeaderOrder')}</th>
+                <th className="text-center w-16">{t('tableHeaderDespatch')}</th>
+                <th>{t('tableHeaderCustomer')}</th>
+                <th>{t('tableHeaderAuditor')}</th>
                 <th className="text-center">{t('tableHeaderDate')}</th>
-                <th className="text-center">{t('tableHeaderStatus')}</th>
-                <th className="text-center">{t('tableHeaderActions')}</th>
+                <th className="text-center w-28">{t('tableHeaderNetWeight')}</th>
+                <th className="text-center w-28">{t('tableHeaderGrossWeight')}</th>
+                <th className="text-center w-28">{t('tableHeaderStatus')}</th>
+                <th className="text-center w-28">{t('tableHeaderActions')}</th>
               </tr>
             </thead>
             <tbody>
@@ -318,7 +321,7 @@ const PickingAuditHistory = () => {
                 return (
                   <React.Fragment key={audit.id}>
                     <tr 
-                      className={`hoverable cursor-pointer ${isExpanded ? 'row-expanded' : ''} ${isSelected ? 'row-selected' : ''}`}
+                      className={`hover:bg-[#f3f9fd] cursor-pointer ${isExpanded ? 'bg-[#eff6fc]' : ''} ${isSelected ? 'bg-[#eff6fc]/60' : ''}`}
                       onClick={() => toggleExpand(audit.id)}
                     >
                       <td className="text-center" onClick={e => e.stopPropagation()}>
@@ -326,43 +329,51 @@ const PickingAuditHistory = () => {
                           type="checkbox"
                           checked={isSelected}
                           onChange={() => toggleSelect(audit.id)}
-                          style={{ cursor: 'pointer', width: '16px', height: '16px' }}
+                          className="rounded border-[#605e5c] cursor-pointer w-4 h-4"
                         />
                       </td>
-                      <td className="text-center">
-                        <span className="expand-arrow">{isExpanded ? '▼' : '▶'}</span>
+                      <td className="text-center text-xs text-[#374151] font-bold">
+                        {isExpanded ? '▼' : '▶'}
                       </td>
-                      <td className="text-center text-mono">#{audit.id}</td>
-                      <td className="text-center"><strong>{audit.order_number}</strong></td>
-                      <td className="text-center text-mono">{audit.despatch_number}</td>
-                      <td className="truncate-cell" style={{ maxWidth: '300px' }}>
-                        <span className="text-muted">[{audit.customer_code}]</span> {audit.customer_name}
+                      <td className="text-center font-mono text-sm font-semibold text-[#374151]">#{audit.id}</td>
+                      <td><span className="font-mono font-bold text-[#111827] text-sm">{audit.order_number}</span></td>
+                      <td className="text-center font-mono text-sm text-[#374151]">{audit.despatch_number}</td>
+                      <td className="text-sm truncate max-w-xs text-[#111827]" title={`${audit.customer_code} - ${audit.customer_name}`}>
+                        <span className="text-[#374151] font-semibold">[{audit.customer_code}]</span> {audit.customer_name}
                       </td>
-                      <td className="profile-cell text-center">{audit.username}</td>
-                      <td className="text-center text-mono text-xs text-muted">{formatDate(audit.timestamp)}</td>
+                      <td className="text-sm text-[#111827]">{audit.username}</td>
+                      <td className="text-center font-mono text-sm text-[#374151]">{formatDate(audit.timestamp)}</td>
+                      <td className="text-center font-mono text-sm font-bold text-[#111827]">
+                        <div>{(audit.net_weight || 0).toFixed(3)} kg</div>
+                        <div className="text-[11px] font-normal text-[#374151]">
+                          Req: {(audit.req_weight || 0).toFixed(3)} kg
+                        </div>
+                      </td>
+                      <td className="text-center font-mono text-sm font-bold text-[#0078d4]">
+                        {(audit.gross_weight || 0).toFixed(3)} kg
+                      </td>
                       <td className="text-center">
-                        <span className={`badge ${
+                        <span className={`inline-block px-2.5 py-0.5 rounded text-xs font-bold uppercase ${
                           audit.status === 'Completo' || audit.status === 'Completado' 
-                          ? 'badge-success' : 'badge-warning'
+                            ? 'bg-[#dcfce7] text-[#0e620e]' 
+                            : 'bg-[#fef3c7] text-[#8a3b07]'
                         }`}>
                           {audit.status}
                         </span>
                       </td>
                       <td className="text-center" onClick={e => e.stopPropagation()}>
-                        <div className="action-buttons">
+                        <div className="flex items-center justify-center gap-2.5 text-sm">
                           {isToday(audit.timestamp) && (
                             <button 
                               onClick={() => handleEditClick(audit)}
-                              className="btn-action-text edit"
-                              title="Modificar auditoría"
+                              className="text-[#0078d4] hover:underline font-semibold cursor-pointer"
                             >
                               {t('btnEdit')}
                             </button>
                           )}
                           <Link 
                             to={`/packing_list/print/${audit.id}`}
-                            className="btn-action-text print"
-                            title="Ver e Imprimir Packing List"
+                            className="text-[#0078d4] hover:underline font-semibold"
                           >
                             {t('btnPrint')}
                           </Link>
@@ -370,39 +381,175 @@ const PickingAuditHistory = () => {
                       </td>
                     </tr>
 
+                    {/* Fila Detalle Expandida */}
                     {isExpanded && (
-                      <tr className="expanded-detail-row">
-                        <td colSpan="10" className="expanded-detail-cell">
-                          <div className="expanded-card">
-                            <h4>{t('expandedDetailTitle')}</h4>
-                            <table>
-                              <thead>
-                                <tr>
-                                  <th style={{ width: '60px' }}>{t('tableHeaderLine')}</th>
-                                  <th>{t('tableHeaderItem')}</th>
-                                  <th>{t('tableHeaderDesc')}</th>
-                                  <th className="text-center" style={{ width: '80px' }}>{t('tableHeaderReq')}</th>
-                                  <th className="text-center" style={{ width: '80px' }}>{t('tableHeaderScan')}</th>
-                                  <th className="text-center" style={{ width: '80px' }}>{t('tableHeaderDiff')}</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {audit.items.map((item, idx) => (
-                                  <tr key={idx}>
-                                    <td className="text-mono text-muted">{item.order_line}</td>
-                                    <td className="sku-code">{item.item_code}</td>
-                                    <td className="sku-desc">{item.description}</td>
-                                    <td className="text-center text-mono">{item.qty_req}</td>
-                                    <td className="text-center text-mono font-medium">{item.qty_scan}</td>
-                                    <td className={`text-center text-mono font-medium ${
-                                      item.difference === 0 ? 'text-success' : 'text-danger'
-                                    }`}>
-                                      {item.difference > 0 ? `+${item.difference}` : item.difference}
-                                    </td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
+                      <tr className="bg-[#fafafa]">
+                        <td colSpan="12" className="p-4 border-b border-[#c8c6c4]">
+                          <div className="bg-white rounded border border-[#c8c6c4] p-5 shadow-xs space-y-4">
+                            {/* Panel Superior: Tarjetas de Resumen de Pesos y Medidas */}
+                            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+                              {/* Tarjeta 1: Pesos de la Auditoría */}
+                              <div className="lg:col-span-6 bg-[#f9f9f9] rounded border border-[#c8c6c4] p-4">
+                                <h5 className="text-xs font-bold uppercase tracking-wider text-[#111827] mb-3 flex items-center gap-1.5">
+                                  ⚖️ Resumen de Pesos
+                                </h5>
+                                <div className="grid grid-cols-3 gap-2 text-center">
+                                  <div className="bg-white p-2.5 rounded border border-[#c8c6c4]">
+                                    <div className="text-xs font-medium text-[#374151] uppercase mb-1">{t('grossWeightTitle')}</div>
+                                    <div className="font-mono text-base font-bold text-[#0078d4]">
+                                      {(audit.gross_weight || 0).toFixed(3)} kg
+                                    </div>
+                                    <div className="text-[10px] text-[#4b5563]">Báscula operador</div>
+                                  </div>
+
+                                  <div className="bg-white p-2.5 rounded border border-[#c8c6c4]">
+                                    <div className="text-xs font-medium text-[#374151] uppercase mb-1">{t('netWeightTitle')}</div>
+                                    <div className="font-mono text-base font-bold text-[#0e620e]">
+                                      {(audit.net_weight || 0).toFixed(3)} kg
+                                    </div>
+                                    <div className="text-[10px] text-[#4b5563]">∑ unit. × escaneados</div>
+                                  </div>
+
+                                  <div className="bg-white p-2.5 rounded border border-[#c8c6c4]">
+                                    <div className="text-xs font-medium text-[#374151] uppercase mb-1">{t('reqWeightTitle')}</div>
+                                    <div className="font-mono text-base font-bold text-[#111827]">
+                                      {(audit.req_weight || 0).toFixed(3)} kg
+                                    </div>
+                                    <div className="text-[10px] text-[#4b5563]">∑ unit. × requeridos</div>
+                                  </div>
+                                </div>
+
+                                <div className="mt-3 pt-2.5 border-t border-[#edebe9] text-xs flex justify-between items-center px-1 text-[#374151]">
+                                  <span>{t('weightDifferenceTitle')} (Bruto - Neto):</span>
+                                  <strong className="font-mono text-sm text-[#111827]">
+                                    {((audit.gross_weight || 0) - (audit.net_weight || 0)).toFixed(3)} kg
+                                  </strong>
+                                </div>
+                              </div>
+
+                              {/* Tarjeta 2: Medidas y Dimensiones de Bultos */}
+                              <div className="lg:col-span-6 bg-[#f9f9f9] rounded border border-[#c8c6c4] p-4">
+                                <h5 className="text-xs font-bold uppercase tracking-wider text-[#111827] mb-3 flex items-center justify-between">
+                                  <span>📦 {t('packageDimensionsTitle')}</span>
+                                  <span className="text-xs font-semibold text-[#0078d4] bg-[#eff6fc] px-2 py-0.5 rounded border border-[#c8c6c4]">
+                                    Total: {audit.packages || audit.packages_dimensions?.length || 1} Bulto(s)
+                                  </span>
+                                </h5>
+
+                                {audit.packages_dimensions && audit.packages_dimensions.length > 0 ? (
+                                  <div className="overflow-x-auto border border-[#c8c6c4] rounded bg-white">
+                                    <table className="w-full text-xs">
+                                      <thead>
+                                        <tr className="bg-[#f3f4f6] text-[#111827] border-b border-[#c8c6c4]">
+                                          <th className="p-2 text-center font-bold">{t('assignTableHeaderPkg')}</th>
+                                          <th className="p-2 text-center font-bold">Largo</th>
+                                          <th className="p-2 text-center font-bold">Ancho</th>
+                                          <th className="p-2 text-center font-bold">Alto</th>
+                                          <th className="p-2 text-center font-bold">Volumen</th>
+                                          <th className="p-2 text-center font-bold text-[#0078d4]">{t('tableHeaderGrossWeight')}</th>
+                                        </tr>
+                                      </thead>
+                                      <tbody>
+                                        {audit.packages_dimensions.map((dim, dIdx) => (
+                                          <tr key={dIdx} className="border-b border-[#edebe9] text-center font-mono hover:bg-[#f9f9f9]">
+                                            <td className="p-2 font-bold text-[#111827]">Bulto {dim.package_number}</td>
+                                            <td className="p-2 text-[#374151]">{dim.length || 0} cm</td>
+                                            <td className="p-2 text-[#374151]">{dim.width || 0} cm</td>
+                                            <td className="p-2 text-[#374151]">{dim.height || 0} cm</td>
+                                            <td className="p-2 text-[#374151]">
+                                              {(((dim.length || 0) * (dim.width || 0) * (dim.height || 0)) / 1000).toFixed(1)} dm³
+                                            </td>
+                                            <td className="p-2 font-bold text-[#0078d4]">{(dim.weight || 0).toFixed(3)} kg</td>
+                                          </tr>
+                                        ))}
+                                      </tbody>
+                                    </table>
+                                  </div>
+                                ) : (
+                                  <div className="bg-white p-3 rounded border border-[#c8c6c4] text-xs text-[#374151] text-center">
+                                    {t('noDimensionsRecorded')}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Tabla de Artículos Auditados */}
+                            <div>
+                              <h4 className="text-sm font-bold uppercase tracking-wider text-[#111827] mb-2.5">
+                                {t('expandedDetailTitle')}
+                              </h4>
+                              <div className="overflow-x-auto border border-[#c8c6c4] rounded">
+                                <table className="w-full text-left sap-table">
+                                  <thead>
+                                    <tr>
+                                      <th className="w-14 text-center">{t('tableHeaderLine')}</th>
+                                      <th>{t('tableHeaderItem')}</th>
+                                      <th>{t('tableHeaderDesc')}</th>
+                                      <th className="text-center w-16">{t('tableHeaderReq')}</th>
+                                      <th className="text-center w-16">{t('tableHeaderScan')}</th>
+                                      <th className="text-center w-16">{t('tableHeaderDiff')}</th>
+                                      <th className="text-center w-24">{t('tableHeaderUnitWeight')}</th>
+                                      <th className="text-center w-28">{t('tableHeaderNetWeight')}</th>
+                                      <th className="text-center w-28">{t('tableHeaderReqWeight')}</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {audit.items.map((item, idx) => {
+                                      const itemWeight = item.item_weight || 0;
+                                      const netLine = item.line_weight !== undefined ? item.line_weight : (itemWeight * (item.qty_scan || 0));
+                                      const reqLine = item.req_line_weight !== undefined ? item.req_line_weight : (itemWeight * (item.qty_req || 0));
+
+                                      return (
+                                        <tr key={idx} className="hover:bg-[#f3f9fd]">
+                                          <td className="text-center font-mono text-sm font-medium text-[#374151]">{item.order_line}</td>
+                                          <td className="font-mono font-bold text-[#111827] text-sm">{item.item_code}</td>
+                                          <td className="text-sm text-[#111827] max-w-xs truncate" title={item.description}>{item.description}</td>
+                                          <td className="text-center font-mono text-sm font-bold text-[#111827]">{item.qty_req}</td>
+                                          <td className="text-center font-mono text-sm font-bold text-[#111827]">{item.qty_scan}</td>
+                                          <td className={`text-center font-mono text-sm font-bold ${
+                                            item.difference === 0 ? 'text-[#0e620e]' : 'text-[#8a1f24]'
+                                          }`}>
+                                            {item.difference > 0 ? `+${item.difference}` : item.difference}
+                                          </td>
+                                          <td className="text-center font-mono text-sm text-[#374151]">
+                                            {itemWeight.toFixed(3)} kg
+                                          </td>
+                                          <td className="text-center font-mono text-sm font-bold text-[#0e620e]">
+                                            {netLine.toFixed(3)} kg
+                                          </td>
+                                          <td className="text-center font-mono text-sm font-bold text-[#111827]">
+                                            {reqLine.toFixed(3)} kg
+                                          </td>
+                                        </tr>
+                                      );
+                                    })}
+                                  </tbody>
+                                  <tfoot>
+                                    <tr className="bg-[#f3f4f6] font-bold border-t-2 border-[#c8c6c4]">
+                                      <td colSpan="3" className="text-right text-xs uppercase text-[#374151] px-4 py-2.5 font-bold">
+                                        {t('tableHeaderTotal') || 'TOTALES'}:
+                                      </td>
+                                      <td className="text-center font-mono text-sm text-[#111827]">
+                                        {audit.total_qty_req || audit.items.reduce((sum, i) => sum + (i.qty_req || 0), 0)}
+                                      </td>
+                                      <td className="text-center font-mono text-sm text-[#111827]">
+                                        {audit.total_qty_scan || audit.items.reduce((sum, i) => sum + (i.qty_scan || 0), 0)}
+                                      </td>
+                                      <td className="text-center font-mono text-sm text-[#111827]">
+                                        {audit.total_difference || audit.items.reduce((sum, i) => sum + ((i.qty_scan || 0) - (i.qty_req || 0)), 0)}
+                                      </td>
+                                      <td className="text-center text-xs text-[#6b7280] font-normal">-</td>
+                                      <td className="text-center font-mono text-sm text-[#0e620e] font-bold">
+                                        {(audit.net_weight || 0).toFixed(3)} kg
+                                      </td>
+                                      <td className="text-center font-mono text-sm text-[#111827] font-bold">
+                                        {(audit.req_weight || 0).toFixed(3)} kg
+                                      </td>
+                                    </tr>
+                                  </tfoot>
+                                </table>
+                              </div>
+                            </div>
                           </div>
                         </td>
                       </tr>
@@ -413,69 +560,86 @@ const PickingAuditHistory = () => {
             </tbody>
           </table>
         </div>
-      </>
       )}
 
       {/* Barra Inferior Flotante de Selección */}
       {selectedIds.size > 0 && (
-        <div className="fixed-selection-bar">
-          <span className="selection-count">{selectedIds.size} {t('tableHeaderShipment').toLowerCase()}s</span>
+        <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-white border border-[#c8c6c4] shadow-xl rounded-full px-6 py-2.5 flex items-center gap-4 z-50 animate-fade-in">
+          <span className="text-sm font-bold text-[#111827]">
+            {selectedIds.size} {t('tableHeaderShipment').toLowerCase()}s seleccionados
+          </span>
           <button 
             onClick={() => setShowShipmentModal(true)} 
-            className="btn btn-primary btn-consolidate"
+            className="rounded bg-[#0078d4] px-4 py-1.5 text-xs md:text-sm font-bold uppercase text-white hover:bg-[#106ebe] transition-colors cursor-pointer shadow-xs"
           >
             {t('consolidateBtn')}
           </button>
-          <button onClick={() => setSelectedIds(new Set())} className="btn-cancel-selection">
+          <button 
+            onClick={() => setSelectedIds(new Set())} 
+            className="text-xs md:text-sm text-[#374151] hover:text-[#111827] font-semibold cursor-pointer"
+          >
             {locale === 'pt' ? 'Limpar' : 'Limpiar'}
           </button>
         </div>
       )}
 
-      {/* Modal de Creación de Consolidado */}
+      {/* Modal de Consolidado */}
       {showShipmentModal && (
-        <div className="modal-overlay">
-          <div className="modal-content shipment-create-modal">
-            <div className="modal-header">
-              <h3>{t('consolidateModalTitle')}</h3>
-              <button onClick={() => setShowShipmentModal(false)} className="close-btn">✕</button>
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded border border-[#d2d0ce] shadow-xl p-6 w-full max-w-md border-t-4 border-t-[#0078d4]">
+            <div className="flex justify-between items-center mb-3">
+              <h3 className="text-sm font-semibold uppercase text-[#201f1e]">
+                {t('consolidateModalTitle')}
+              </h3>
+              <button onClick={() => setShowShipmentModal(false)} className="text-sm font-bold text-[#605e5c] cursor-pointer">✕</button>
             </div>
-            <div className="modal-body">
-              <p className="shipment-modal-desc">{t('consolidateModalDesc')}</p>
-              
-              <div className="form-group" style={{ marginBottom: '1.25rem' }}>
-                <label className="form-label">{t('carrierLabel')}</label>
+            <p className="text-xs text-[#605e5c] mb-4">
+              {t('consolidateModalDesc')}
+            </p>
+            
+            <div className="space-y-4 mb-5">
+              <div>
+                <label className="block text-xs font-semibold uppercase text-[#201f1e] mb-1">
+                  {t('carrierLabel')}
+                </label>
                 <input
                   type="text"
                   value={shipmentCarrier}
                   onChange={(e) => setShipmentCarrier(e.target.value)}
                   placeholder={t('carrierPlaceholder')}
                   required
+                  className="w-full rounded border border-[#8a8886] p-2 text-xs font-normal text-[#201f1e] outline-none focus:border-[#0078d4]"
                 />
               </div>
 
-              <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-                <label className="form-label">{t('notesLabel')}</label>
+              <div>
+                <label className="block text-xs font-semibold uppercase text-[#201f1e] mb-1">
+                  {t('notesLabel')}
+                </label>
                 <textarea
                   value={shipmentNote}
                   onChange={(e) => setShipmentNote(e.target.value)}
                   placeholder={t('notesPlaceholder')}
                   rows={3}
+                  className="w-full rounded border border-[#8a8886] p-2 text-xs font-normal text-[#201f1e] outline-none focus:border-[#0078d4]"
                 />
               </div>
+            </div>
 
-              <div className="modal-actions">
-                <button onClick={() => setShowShipmentModal(false)} className="btn btn-secondary">
-                  {t('cancelBtn')}
-                </button>
-                <button 
-                  onClick={handleCreateShipment} 
-                  className="btn btn-primary"
-                  disabled={creatingShipment}
-                >
-                  {creatingShipment ? t('consolidatingModalBtn') : t('consolidateModalBtn')}
-                </button>
-              </div>
+            <div className="flex justify-end gap-2">
+              <button 
+                onClick={() => setShowShipmentModal(false)} 
+                className="rounded border border-[#d2d0ce] px-3 py-1.5 text-xs text-[#605e5c] hover:bg-[#f3f3f3] cursor-pointer"
+              >
+                {t('cancelBtn')}
+              </button>
+              <button 
+                onClick={handleCreateShipment} 
+                disabled={creatingShipment}
+                className="rounded bg-[#0078d4] px-4 py-1.5 text-xs font-medium text-white hover:bg-[#106ebe] transition-colors disabled:opacity-50 cursor-pointer shadow-xs"
+              >
+                {creatingShipment ? t('consolidatingModalBtn') : t('consolidateModalBtn')}
+              </button>
             </div>
           </div>
         </div>
@@ -483,401 +647,92 @@ const PickingAuditHistory = () => {
 
       {/* Modal de Edición de Auditoría */}
       {isEditModalOpen && editingAudit && (
-        <div className="modal-overlay">
-          <div className="modal-content edit-audit-modal">
-            <div className="modal-header">
-              <h3>{t('editModalTitle')} #{editingAudit.id}</h3>
-              <div className="modal-header-controls">
-                <div className="pkg-edit-controls">
-                  <span className="pkg-lbl">{t('assignTableHeaderPkg')}s: <strong>{editingAudit.packages}</strong></span>
-                  <div className="pkg-pm-btns">
-                    <button onClick={handleRemovePackage} className="pm-btn">−</button>
-                    <button onClick={handleAddPackage} className="pm-btn">+</button>
-                  </div>
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded border border-[#d2d0ce] shadow-xl p-6 w-full max-w-3xl max-h-[90vh] overflow-y-auto border-t-4 border-t-[#0078d4]">
+            <div className="flex justify-between items-center mb-3">
+              <h3 className="text-sm font-semibold uppercase text-[#201f1e]">
+                {t('editModalTitle')} #{editingAudit.id}
+              </h3>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-1.5 text-xs">
+                  <span className="text-[#605e5c]">{t('assignTableHeaderPkg')}s: <strong>{editingAudit.packages}</strong></span>
+                  <button onClick={handleRemovePackage} className="w-6 h-6 rounded border border-[#d2d0ce] flex items-center justify-center font-bold hover:bg-[#fde7e9] text-[#a4262c] cursor-pointer">−</button>
+                  <button onClick={handleAddPackage} className="w-6 h-6 rounded border border-[#0078d4] flex items-center justify-center font-bold hover:bg-[#eff6fc] text-[#0078d4] cursor-pointer">+</button>
                 </div>
-                <button onClick={() => setIsEditModalOpen(false)} className="close-btn">✕</button>
+                <button onClick={() => setIsEditModalOpen(false)} className="text-sm font-bold text-[#605e5c] cursor-pointer">✕</button>
               </div>
             </div>
-            <div className="modal-body">
-              <div className="audit-edit-meta">
-                <span>{t('orderLabel')}: <strong>{editingAudit.order_number}</strong></span>
-                <span>{t('customerLabel')}: <strong>{editingAudit.customer_name}</strong></span>
-              </div>
 
-              <div className="edit-table-container">
-                <table>
-                  <thead>
-                    <tr>
-                      <th style={{ width: '50px' }}>{t('tableHeaderLine')}</th>
-                      <th>{t('tableHeaderItem')}</th>
-                      <th className="text-center" style={{ width: '80px' }}>{t('tableHeaderReq')}</th>
-                      <th className="text-left">{t('assignModalDesc')}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {editingAudit.items.map((item, idx) => {
-                      const itemKey = `${item.item_code}:${item.order_line || ''}`;
-                      const assignments = editingAudit.packages_assignment?.[itemKey] || {};
+            <div className="bg-[#f9f9f9] border border-[#d2d0ce] p-2.5 rounded mb-4 text-xs flex gap-4 text-[#605e5c]">
+              <span>{t('orderLabel')}: <strong className="font-mono text-[#0078d4]">{editingAudit.order_number}</strong></span>
+              <span>{t('customerLabel')}: <strong className="text-[#201f1e]">{editingAudit.customer_name}</strong></span>
+            </div>
 
-                      return (
-                        <tr key={idx}>
-                          <td className="text-mono text-muted">{item.order_line}</td>
-                          <td>
-                            <strong>{item.item_code}</strong>
-                            <div className="text-xs text-muted" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '240px' }}>{item.description}</div>
-                          </td>
-                          <td className="text-center text-mono font-medium">{item.qty_req}</td>
-                          <td>
-                            <div className="pkg-edit-grid">
-                              {Array.from({ length: editingAudit.packages }).map((_, i) => (
-                                <div key={i} className="pkg-edit-input-group">
-                                  <span className="pkg-num-lbl">B{i + 1}</span>
-                                  <input
-                                    type="number"
-                                    min="0"
-                                    value={assignments[i + 1] || 0}
-                                    onChange={(e) => handlePkgQtyChange(idx, i + 1, e.target.value)}
-                                    onFocus={(e) => e.target.select()}
-                                  />
-                                </div>
-                              ))}
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
+            <div className="overflow-x-auto border border-[#d2d0ce] rounded mb-4">
+              <table className="w-full text-xs sap-table">
+                <thead>
+                  <tr>
+                    <th className="w-14 text-center">{t('tableHeaderLine')}</th>
+                    <th>{t('tableHeaderItem')}</th>
+                    <th className="text-center w-16">{t('tableHeaderReq')}</th>
+                    <th>{t('assignModalDesc')}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {editingAudit.items.map((item, idx) => {
+                    const itemKey = `${item.item_code}:${item.order_line || ''}`;
+                    const assignments = editingAudit.packages_assignment?.[itemKey] || {};
 
-              <div className="modal-actions">
-                <button onClick={() => setIsEditModalOpen(false)} className="btn btn-secondary">
-                  {t('cancelBtn')}
-                </button>
-                <button 
-                  onClick={handleSaveEdit} 
-                  className="btn btn-primary"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? t('editModalSaving') : t('editModalSave')}
-                </button>
-              </div>
+                    return (
+                      <tr key={idx} className="hover:bg-[#f3f9fd]">
+                        <td className="text-center font-mono text-[#605e5c]">{item.order_line}</td>
+                        <td>
+                          <span className="font-mono font-medium text-[#201f1e]">{item.item_code}</span>
+                          <div className="text-[11px] text-[#605e5c] truncate max-w-xs">{item.description}</div>
+                        </td>
+                        <td className="text-center font-mono font-semibold">{item.qty_req}</td>
+                        <td>
+                          <div className="flex gap-1.5 flex-wrap py-1">
+                            {Array.from({ length: editingAudit.packages }).map((_, i) => (
+                              <div key={i} className="flex items-center gap-1">
+                                <span className="text-[10px] text-[#605e5c]">B{i + 1}:</span>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  className="w-12 text-center rounded border border-[#8a8886] py-0.5 text-xs font-mono"
+                                  value={assignments[i + 1] || 0}
+                                  onChange={(e) => handlePkgQtyChange(idx, i + 1, e.target.value)}
+                                  onFocus={(e) => e.target.select()}
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <button 
+                onClick={() => setIsEditModalOpen(false)} 
+                className="rounded border border-[#d2d0ce] px-3 py-1.5 text-xs text-[#605e5c] hover:bg-[#f3f3f3] cursor-pointer"
+              >
+                {t('cancelBtn')}
+              </button>
+              <button 
+                onClick={handleSaveEdit} 
+                disabled={isSubmitting}
+                className="rounded bg-[#0078d4] px-4 py-1.5 text-xs font-medium text-white hover:bg-[#106ebe] transition-colors disabled:opacity-50 cursor-pointer shadow-xs"
+              >
+                {isSubmitting ? t('editModalSaving') : t('editModalSave')}
+              </button>
             </div>
           </div>
         </div>
       )}
-
-      <style dangerouslySetInnerHTML={{
-        __html: `
-        .history-container {
-          display: flex;
-          flex-direction: column;
-        }
-
-        .history-toolbar {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 1.25rem;
-          gap: 1.5rem;
-          flex-wrap: wrap;
-        }
-
-        .history-subtitle {
-          font-size: 0.85rem;
-          color: var(--text-muted);
-          margin: 0;
-        }
-
-        .btn-export-excel {
-          border-color: #107e3e !important;
-          color: #107e3e !important;
-          background-color: transparent !important;
-          font-weight: 600;
-          height: 36px;
-        }
-
-        .btn-export-excel:hover:not(:disabled) {
-          background-color: rgba(16, 126, 62, 0.05) !important;
-          border-color: #0d6b34 !important;
-          color: #0d6b34 !important;
-        }
-
-        .history-table-container {
-          border: 1px solid var(--border-color);
-          border-radius: var(--radius-md);
-          overflow: visible;
-        }
-
-        .text-center {
-          text-align: center;
-        }
-
-        .truncate-cell {
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
-
-        .row-expanded {
-          background-color: #f8fafc;
-        }
-
-        .row-selected {
-          background-color: #eff6ff !important;
-        }
-
-        .expand-arrow {
-          font-size: 0.75rem;
-          color: var(--text-muted);
-          transition: var(--transition-fast);
-        }
-
-        .profile-cell {
-          text-transform: capitalize;
-        }
-
-        .action-buttons {
-          display: flex;
-          justify-content: center;
-          gap: 1rem;
-        }
-
-        .btn-action-text {
-          background: transparent;
-          border: none;
-          font-size: 0.75rem;
-          font-weight: 600;
-          cursor: pointer;
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-        }
-
-        .btn-action-text.edit {
-          color: var(--text-muted);
-        }
-
-        .btn-action-text.edit:hover {
-          color: var(--primary);
-        }
-
-        .btn-action-text.print {
-          color: var(--primary);
-        }
-
-        .btn-action-text.print:hover {
-          color: var(--primary-hover);
-        }
-
-        /* Detalle Expandido */
-        .expanded-detail-row {
-          background-color: #f8fafc;
-        }
-
-        .expanded-detail-cell {
-          padding: 1.5rem 3rem !important;
-          border-bottom: 1.5px solid var(--border-color) !important;
-        }
-
-        .expanded-card {
-          background-color: white;
-          border: 1px solid var(--border-color);
-          border-radius: var(--radius-sm);
-          padding: 1.25rem;
-          box-shadow: var(--shadow-sm);
-        }
-
-        .expanded-card h4 {
-          font-size: 0.8rem;
-          font-weight: 700;
-          color: var(--text-muted);
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-          margin-bottom: 0.75rem;
-          border-bottom: 1px solid #f1f5f9;
-          padding-bottom: 0.5rem;
-        }
-
-        .expanded-card table {
-          font-size: 0.8rem;
-        }
-
-        .expanded-card th {
-          padding: 0.5rem 0.75rem;
-        }
-
-        .expanded-card td {
-          padding: 0.5rem 0.75rem;
-        }
-
-        /* Barra de Selección Fija Inferior */
-        .fixed-selection-bar {
-          position: fixed;
-          bottom: 2rem;
-          left: 50%;
-          transform: translateX(-50%);
-          background-color: #1e293b;
-          border: 1px solid rgba(255,255,255,0.1);
-          color: white;
-          padding: 0.75rem 2rem;
-          border-radius: var(--radius-full);
-          box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
-          z-index: 99;
-          display: flex;
-          align-items: center;
-          gap: 1.5rem;
-          animation: bar-enter 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        @keyframes bar-enter {
-          from {
-            opacity: 0;
-            transform: translateX(-50%) translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(-50%) translateY(0);
-          }
-        }
-
-        .selection-count {
-          font-size: 0.8rem;
-          font-weight: 600;
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-          color: #94a3b8;
-        }
-
-        .btn-consolidate {
-          background-color: white;
-          color: #0f172a;
-          height: 34px;
-          border-radius: var(--radius-full);
-          font-size: 0.75rem;
-          font-weight: 700;
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-        }
-
-        .btn-consolidate:hover {
-          background-color: #f1f5f9;
-        }
-
-        .btn-cancel-selection {
-          background: transparent;
-          border: none;
-          color: #f87171;
-          cursor: pointer;
-          font-size: 0.8rem;
-          font-weight: 500;
-        }
-
-        .btn-cancel-selection:hover {
-          color: #ef4444;
-        }
-
-        /* ESTILOS DE MODAL EDICIÓN */
-        .edit-audit-modal {
-          max-width: 800px;
-        }
-
-        .modal-header-controls {
-          display: flex;
-          align-items: center;
-          gap: 1rem;
-        }
-
-        .pkg-edit-controls {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          background-color: #f1f5f9;
-          border: 1px solid var(--border-color);
-          padding: 0.25rem 0.5rem;
-          border-radius: var(--radius-sm);
-        }
-
-        .pkg-lbl {
-          font-size: 0.75rem;
-          color: var(--text-muted);
-        }
-
-        .pkg-pm-btns {
-          display: flex;
-          gap: 0.25rem;
-        }
-
-        .pm-btn {
-          width: 22px;
-          height: 22px;
-          border-radius: 4px;
-          border: 1px solid #cbd5e1;
-          background-color: white;
-          font-size: 0.85rem;
-          font-weight: 600;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-
-        .pm-btn:hover {
-          background-color: #f8fafc;
-        }
-
-        .audit-edit-meta {
-          display: flex;
-          gap: 1.5rem;
-          font-size: 0.85rem;
-          color: var(--text-muted);
-          margin-bottom: 1.25rem;
-          border-bottom: 1px solid var(--border-color);
-          padding-bottom: 0.5rem;
-        }
-
-        .edit-table-container {
-          max-height: 360px;
-          overflow-y: auto;
-          border: 1px solid var(--border-color);
-          border-radius: var(--radius-sm);
-          margin-bottom: 1.5rem;
-        }
-
-        .pkg-edit-grid {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 0.5rem;
-        }
-
-        .pkg-edit-input-group {
-          display: flex;
-          align-items: center;
-          border: 1px solid var(--border-color);
-          border-radius: 4px;
-          overflow: hidden;
-          background-color: #f8fafc;
-          height: 28px;
-        }
-
-        .pkg-num-lbl {
-          font-size: 0.65rem;
-          font-weight: 700;
-          color: var(--text-muted);
-          padding: 0 0.4rem;
-        }
-
-        .pkg-edit-input-group input {
-          width: 38px;
-          height: 26px !important;
-          border: none !important;
-          border-left: 1px solid var(--border-color) !important;
-          border-radius: 0 !important;
-          text-align: center;
-          font-size: 0.8rem !important;
-          font-weight: 600 !important;
-          padding: 0 !important;
-        }
-      `}} />
     </div>
   );
 };

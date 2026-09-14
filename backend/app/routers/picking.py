@@ -83,6 +83,13 @@ async def get_picking_order(order_number: str, despatch_number: str, accept_lang
                 detail=get_message("csv_bad_columns", accept_language)
             )
 
+        # Detectar columnas de peso (Item_Weight)
+        weight_col = None
+        for col in df.columns:
+            if col.strip().lower() in ["item_weight", "item weight", "itemweight", "weight"]:
+                weight_col = col
+                break
+
         # Limpiar columnas clave
         df = df.with_columns([
             pl.col("ORDER_").cast(pl.Utf8).str.strip_chars(),
@@ -90,6 +97,10 @@ async def get_picking_order(order_number: str, despatch_number: str, accept_lang
         ])
         if "QTY" in df.columns:
             df = df.with_columns(pl.col("QTY").cast(pl.Utf8).str.replace_all(',', ''))
+        if weight_col:
+            df = df.with_columns(
+                pl.col(weight_col).cast(pl.Utf8).str.replace_all(',', '.').str.strip_chars()
+            )
 
         order_number_clean = str(order_number).strip()
         despatch_number_clean = str(despatch_number).strip()
@@ -122,11 +133,19 @@ async def get_picking_order(order_number: str, despatch_number: str, accept_lang
         }
         if customer_col:
             rename_map[customer_col] = "Customer Code"
+        if weight_col:
+            rename_map[weight_col] = "Item Weight"
             
         order_data = order_data.rename(rename_map)
+        
+        # Asegurar columna Item Weight
+        if "Item Weight" not in order_data.columns:
+            order_data = order_data.with_columns(pl.lit("0.0").alias("Item Weight"))
+
         order_data = order_data.with_columns([
             pl.col("Customer Code").cast(pl.Utf8).str.strip_chars() if "Customer Code" in order_data.columns else pl.lit(""),
-            pl.col("Customer Name").cast(pl.Utf8).str.strip_chars()
+            pl.col("Customer Name").cast(pl.Utf8).str.strip_chars(),
+            pl.col("Item Weight").cast(pl.Utf8).fill_null("0.0")
         ])
         order_data = order_data.fill_null("")
         
@@ -204,6 +223,23 @@ async def get_picking_tracking(db: AsyncSession = Depends(get_db)):
 async def view_picking_audits(db: AsyncSession = Depends(get_db)):
     """API: Historial de picking empacados/auditados con resumen."""
     try:
+        # Cargar mapa de pesos unitarios desde CSV como fallback
+        item_weights_csv = {}
+        if os.path.exists(PICKING_CSV_PATH):
+            try:
+                df_csv = pl.read_csv(PICKING_CSV_PATH, infer_schema_length=0)
+                df_csv.columns = [c.lstrip('\ufeff') for c in df_csv.columns]
+                w_col = next((c for c in df_csv.columns if c.strip().lower() in ["item_weight", "item weight", "itemweight", "weight"]), None)
+                if w_col and "ITEM" in df_csv.columns:
+                    for r in df_csv.select(["ITEM", w_col]).unique(subset=["ITEM"]).iter_rows(named=True):
+                        try:
+                            val_str = str(r[w_col] or "").replace(',', '.').strip()
+                            item_weights_csv[str(r["ITEM"]).strip().upper()] = float(val_str) if val_str else 0.0
+                        except:
+                            pass
+            except:
+                pass
+
         result = await db.execute(
             select(PickingAuditModel)
             .options(selectinload(PickingAuditModel.items), selectinload(PickingAuditModel.packages_metadata))
@@ -213,6 +249,50 @@ async def view_picking_audits(db: AsyncSession = Depends(get_db)):
         
         response = []
         for audit in audits:
+            # Dimensiones y medidas de bultos
+            packages_dimensions = [
+                {
+                    "package_number": pd.package_number,
+                    "length": pd.length or 0.0,
+                    "width": pd.width or 0.0,
+                    "height": pd.height or 0.0,
+                    "weight": pd.weight or 0.0
+                }
+                for pd in (audit.packages_metadata or [])
+            ]
+            packages_dimensions.sort(key=lambda x: x["package_number"])
+
+            # Peso bruto = suma de los pesos ingresados por el operador en cada bulto
+            gross_weight = sum((pd.weight or 0.0) for pd in (audit.packages_metadata or []))
+
+            # Preparar ítems con su peso unitario resuelto
+            resolved_items = []
+            net_weight = 0.0
+            req_weight = 0.0
+
+            for item in audit.items:
+                item_code_clean = str(item.item_code or "").strip().upper()
+                w = getattr(item, 'item_weight', 0.0) or 0.0
+                if w <= 0.0 and item_code_clean in item_weights_csv:
+                    w = item_weights_csv[item_code_clean]
+                
+                scan_line_wt = w * (item.qty_scan or 0)
+                req_line_wt = w * (item.qty_req or 0)
+                net_weight += scan_line_wt
+                req_weight += req_line_wt
+
+                resolved_items.append({
+                    "item_code": item.item_code,
+                    "description": item.description,
+                    "order_line": item.order_line,
+                    "qty_req": item.qty_req,
+                    "qty_scan": item.qty_scan,
+                    "item_weight": round(w, 3),
+                    "line_weight": round(scan_line_wt, 3),
+                    "req_line_weight": round(req_line_wt, 3),
+                    "difference": item.difference
+                })
+
             response.append({
                 "id": audit.id,
                 "order_number": audit.order_number,
@@ -222,18 +302,15 @@ async def view_picking_audits(db: AsyncSession = Depends(get_db)):
                 "username": audit.username,
                 "timestamp": audit.timestamp,
                 "status": audit.status,
-                "packages": audit.packages or 0,
-                "items": [
-                    {
-                        "item_code": item.item_code,
-                        "description": item.description,
-                        "order_line": item.order_line,
-                        "qty_req": item.qty_req,
-                        "qty_scan": item.qty_scan,
-                        "difference": item.difference
-                    }
-                    for item in audit.items
-                ]
+                "packages": audit.packages or len(packages_dimensions) or 0,
+                "packages_dimensions": packages_dimensions,
+                "gross_weight": round(gross_weight, 3),
+                "net_weight": round(net_weight, 3),
+                "req_weight": round(req_weight, 3),
+                "total_qty_req": sum((i.qty_req or 0) for i in audit.items),
+                "total_qty_scan": sum((i.qty_scan or 0) for i in audit.items),
+                "total_difference": sum((i.difference or 0) for i in audit.items),
+                "items": resolved_items
             })
         return ORJSONResponse(content=response)
     except Exception as e:
@@ -257,20 +334,24 @@ async def export_picking_audits(db: AsyncSession = Depends(get_db), accept_langu
             "ID Auditoria", "Número do Pedido", "Número de Despacho", 
             "Código do Cliente", "Nome do Cliente", "Auditor", 
             "Data e Hora", "Status", "Total de Volumes",
+            "Peso Bruto (Operador kg)", "Peso Líquido Total (kg)", "Peso Requisitado (kg)",
             "Linha do Pedido", "Código do Item", "Descrição do Item", 
-            "Qtd. Requisitada", "Qtd. Lida", "Diferença"
+            "Qtd. Requisitada", "Qtd. Lida", "Diferença",
+            "Peso Unit. (kg)", "Peso Líquido Linha (kg)", "Peso Requisitado Linha (kg)"
         ] if is_pt else [
             "ID Auditoría", "Número de Orden", "Número de Despacho", 
             "Código de Cliente", "Nombre de Cliente", "Auditor", 
             "Fecha y Hora", "Estado", "Total Bultos",
+            "Peso Bruto (Operador kg)", "Peso Neto Total (kg)", "Peso Requerido Total (kg)",
             "Línea de Orden", "Código de Artículo", "Descripción del Artículo", 
-            "Cant. Requerida", "Cant. Escaneada", "Diferencia"
+            "Cant. Requerida", "Cant. Escaneada", "Diferencia",
+            "Peso Unit. (kg)", "Peso Neto Línea (kg)", "Peso Requerido Línea (kg)"
         ]
         
-        # Consultar todas las auditorías con sus ítems
+        # Consultar todas las auditorías con sus ítems y bultos
         result = await db.execute(
             select(PickingAuditModel)
-            .options(selectinload(PickingAuditModel.items))
+            .options(selectinload(PickingAuditModel.items), selectinload(PickingAuditModel.packages_metadata))
             .order_by(PickingAuditModel.id.desc())
         )
         audits = result.scalars().unique().all()
@@ -313,9 +394,17 @@ async def export_picking_audits(db: AsyncSession = Depends(get_db), accept_langu
             if ts_str and "T" in ts_str:
                 ts_str = ts_str.replace("T", " ")
                 
+            # Pesos de auditoría
+            gross_wt = sum((pd.weight or 0.0) for pd in (audit.packages_metadata or []))
+            net_wt = sum(((getattr(i, 'item_weight', 0.0) or 0.0) * (i.qty_scan or 0)) for i in audit.items)
+            req_wt = sum(((getattr(i, 'item_weight', 0.0) or 0.0) * (i.qty_req or 0)) for i in audit.items)
+
             # Si tiene ítems, agregar una fila por cada ítem
             if audit.items:
                 for item in audit.items:
+                    item_wt = getattr(item, 'item_weight', 0.0) or 0.0
+                    scan_line_wt = round(item_wt * item.qty_scan, 3)
+                    req_line_wt = round(item_wt * item.qty_req, 3)
                     row_data = [
                         audit.id,
                         audit.order_number,
@@ -326,12 +415,18 @@ async def export_picking_audits(db: AsyncSession = Depends(get_db), accept_langu
                         ts_str,
                         audit.status,
                         audit.packages or 0,
+                        round(gross_wt, 3),
+                        round(net_wt, 3),
+                        round(req_wt, 3),
                         item.order_line or "",
                         item.item_code,
                         item.description or "",
                         item.qty_req,
                         item.qty_scan,
-                        item.difference
+                        item.difference,
+                        round(item_wt, 3),
+                        scan_line_wt,
+                        req_line_wt
                     ]
                     
                     is_even = (row_num % 2 == 0)
@@ -430,6 +525,33 @@ async def get_packing_list_data(
                 status_code=404, 
                 detail=get_message("audit_not_found", accept_language, audit_id=audit_id)
             )
+
+        # Cargar mapa de pesos unitarios desde CSV como fallback
+        item_weights_csv = {}
+        if os.path.exists(PICKING_CSV_PATH):
+            try:
+                df_csv = pl.read_csv(PICKING_CSV_PATH, infer_schema_length=0)
+                df_csv.columns = [c.lstrip('\ufeff') for c in df_csv.columns]
+                w_col = next((c for c in df_csv.columns if c.strip().lower() in ["item_weight", "item weight", "itemweight", "weight"]), None)
+                if w_col and "ITEM" in df_csv.columns:
+                    for r in df_csv.select(["ITEM", w_col]).unique(subset=["ITEM"]).iter_rows(named=True):
+                        try:
+                            val_str = str(r[w_col] or "").replace(',', '.').strip()
+                            item_weights_csv[str(r["ITEM"]).strip().upper()] = float(val_str) if val_str else 0.0
+                        except:
+                            pass
+            except:
+                pass
+
+        # Cargar pesos unitarios de los items de la auditoría
+        audit_items_res = await db.execute(select(PickingAuditItem).where(PickingAuditItem.audit_id == audit_id))
+        audit_items_map = {}
+        for ai in audit_items_res.scalars().all():
+            code_key = str(ai.item_code or "").strip().upper()
+            w = getattr(ai, 'item_weight', 0.0) or 0.0
+            if w <= 0.0 and code_key in item_weights_csv:
+                w = item_weights_csv[code_key]
+            audit_items_map[code_key] = round(w, 3)
             
         # Artículos en bultos
         result = await db.execute(
@@ -440,16 +562,31 @@ async def get_packing_list_data(
         package_items = result.scalars().all()
         
         packages = {}
+        packages_net_weights = {}
         for item in package_items:
             pkg_num = str(item.package_number)
             if pkg_num not in packages:
                 packages[pkg_num] = []
+                packages_net_weights[pkg_num] = 0.0
+
+            code_key = str(item.item_code or "").strip().upper()
+            unit_w = audit_items_map.get(code_key, 0.0)
+            if unit_w <= 0.0 and code_key in item_weights_csv:
+                unit_w = item_weights_csv[code_key]
+
+            qty = item.qty_scan or 0
+            line_w = round(unit_w * qty, 3)
+            packages_net_weights[pkg_num] = round(packages_net_weights[pkg_num] + line_w, 3)
+
             packages[pkg_num].append({
                 "order_line": item.order_line or "",
                 "item_code": item.item_code,
                 "description": item.description or "",
-                "quantity": item.qty_scan
+                "quantity": qty,
+                "item_weight": round(unit_w, 3),
+                "line_weight": line_w
             })
+
         # Dimensiones de bultos
         result_pkg = await db.execute(select(PickingPackage).where(PickingPackage.audit_id == audit_id))
         packages_dimensions = {
@@ -457,10 +594,14 @@ async def get_packing_list_data(
                 "length": p.length or 0.0,
                 "width": p.width or 0.0,
                 "height": p.height or 0.0,
-                "weight": p.weight or 0.0
+                "weight": p.weight or 0.0,
+                "net_weight": packages_net_weights.get(str(p.package_number), 0.0)
             }
             for p in result_pkg.scalars().all()
         }
+
+        total_net_weight = round(sum(packages_net_weights.values()), 3)
+        total_gross_weight = round(sum((pd.get("weight") or 0.0) for pd in packages_dimensions.values()), 3)
             
         return ORJSONResponse(content={
             "order_number": audit.order_number,
@@ -468,9 +609,12 @@ async def get_packing_list_data(
             "customer_code": audit.customer_code or "",
             "customer_name": audit.customer_name or "N/A",
             "timestamp": audit.timestamp,
-            "total_packages": audit.packages or 0,
+            "total_packages": audit.packages or len(packages_dimensions) or len(packages) or 0,
             "packages": packages,
-            "packages_dimensions": packages_dimensions
+            "packages_dimensions": packages_dimensions,
+            "packages_net_weights": packages_net_weights,
+            "total_net_weight": total_net_weight,
+            "total_gross_weight": total_gross_weight
         })
     except HTTPException:
         raise
@@ -538,6 +682,7 @@ async def get_picking_audit(
                     "order_line": item.order_line,
                     "qty_req": item.qty_req,
                     "qty_scan": item.qty_scan,
+                    "item_weight": getattr(item, 'item_weight', 0.0) or 0.0,
                     "edited": item.edited or 0
                 }
                 for item in items
@@ -581,6 +726,7 @@ async def save_picking_audit(
                 qty_req=item.qty_req,
                 qty_scan=item.qty_scan,
                 difference=difference,
+                item_weight=item.item_weight or 0.0,
                 edited=0
             )
             db.add(new_item)
@@ -675,6 +821,8 @@ async def update_picking_audit(
             if db_item:
                 db_item.qty_scan = item.qty_scan
                 db_item.difference = item.qty_scan - item.qty_req
+                if item.item_weight is not None:
+                    db_item.item_weight = item.item_weight
                 db_item.edited = 1
                 
         # Limpiar y regenerar dimensiones

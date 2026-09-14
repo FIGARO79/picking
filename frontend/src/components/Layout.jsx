@@ -1,12 +1,26 @@
 import React, { useEffect, useState } from 'react';
-import { NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { NavLink, useNavigate, useLocation, Link } from 'react-router-dom';
 import { useTranslation } from '../context/LanguageContext';
+import '../styles/Layout.css';
 
 const Layout = ({ children, title }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { t, locale, changeLanguage } = useTranslation();
   const [auditorName, setAuditorName] = useState('');
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   useEffect(() => {
     const stored = localStorage.getItem('auditor_name');
@@ -22,21 +36,14 @@ const Layout = ({ children, title }) => {
     navigate('/login');
   };
 
-  const navItems = [
-    { path: '/', labelKey: 'menuDashboard' },
-    { path: '/picking', labelKey: 'menuAudit' },
-    { path: '/view_picking_audits', labelKey: 'menuHistory' },
-    { path: '/shipments', labelKey: 'menuShipments' },
-    { path: '/settings', labelKey: 'menuSettings' }
-  ];
-
   const getTranslatedTitle = (currentTitle) => {
     if (currentTitle === 'Dashboard') return t('menuDashboard');
     if (currentTitle === 'Auditoría de Picking') return t('menuAudit');
     if (currentTitle === 'Pickings Empacados') return t('menuHistory');
     if (currentTitle === 'Envíos Consolidados') return t('menuShipments');
     if (currentTitle === 'Configuración' || currentTitle === 'Configuração') return t('menuSettings');
-    return currentTitle;
+    if (currentTitle === 'Carga de Archivos' || currentTitle === 'Carregar Arquivos') return t('menuUpload');
+    return currentTitle || 'LOGIX';
   };
 
   const isPrintPage = location.pathname.includes('/print/');
@@ -45,320 +52,163 @@ const Layout = ({ children, title }) => {
     return <>{children}</>;
   }
 
+  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+
+  const navSections = [
+    {
+      title: 'Principal',
+      items: [
+        { path: '/', labelKey: 'menuDashboard', label: 'Inicio', desc: 'Panel principal' }
+      ]
+    },
+    {
+      title: 'Operaciones Outbound',
+      items: [
+        { path: '/picking', labelKey: 'menuAudit', label: 'Picking', desc: 'Verificación de pedidos' },
+        { path: '/view_picking_audits', labelKey: 'menuHistory', label: 'Empaque', desc: 'Auditorías y empaque' },
+        { path: '/shipments', labelKey: 'menuShipments', label: 'Despacho', desc: 'Gestión de despachos' }
+      ]
+    },
+    {
+      title: 'Sistema',
+      items: [
+        { path: '/settings', labelKey: 'menuSettings', label: 'Configuración', desc: 'Carga de archivos y parámetros' },
+        { path: '/update', labelKey: 'menuUpload', label: 'Carga de Archivos', desc: 'Subir archivo de picking CSV' }
+      ]
+    }
+  ];
+
   return (
-    <div className="app-container">
-      {/* Barra Lateral Premium */}
-      <aside className="sidebar no-print">
-        <div className="sidebar-logo">
-          <div className="logo-text">
-            <h2>LOGIX<span className="logo-dot">.</span></h2>
-            <span>{t('welcomeSubtitle')}</span>
+    <div className="flex min-h-screen flex-col bg-[#f3f3f3] font-sans text-[#111827] print:block print:h-auto print:overflow-visible">
+      {/* Header / Shell Bar Estilo Windows Fluent */}
+      <header className="top-header sticky top-0 z-50 flex h-[48px] items-center justify-between border-b border-[#c8c6c4] bg-white px-4 text-[#111827] shadow-none print:hidden no-print">
+        <div className="flex items-center gap-3">
+          <button
+            className="cursor-pointer rounded p-1.5 text-[#374151] transition-all hover:bg-[#e5e7eb] hover:text-[#111827]"
+            onClick={toggleMenu}
+            aria-label="Menú"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.2} stroke="currentColor" className="w-5 h-5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+            </svg>
+          </button>
+
+          <div className="flex items-center gap-2">
+            <Link to="/" className="flex items-center gap-1 text-base font-bold tracking-wide text-[#1e3a5f] hover:text-[#0078d4] transition-colors">
+              <span className="tracking-wider">LOGIX</span>
+              <span className="text-[#0078d4] font-black">.</span>
+            </Link>
+            <span className="text-[#c8c6c4] text-sm">|</span>
+            <span className="text-xs md:text-sm font-semibold text-[#111827] uppercase tracking-wide">
+              {getTranslatedTitle(title)}
+            </span>
           </div>
         </div>
 
-        <nav className="sidebar-nav">
-          {navItems.map((item) => (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              className={({ isActive }) => 
-                `nav-item ${isActive ? 'active' : ''}`
-              }
+        {/* Acciones de Cabecera */}
+        <div className="header-actions flex items-center gap-3">
+          {/* Badge Online/Offline */}
+          <div className={`hidden sm:flex items-center gap-1.5 rounded-full border border-solid px-2.5 py-0.5 text-xs font-semibold uppercase transition-all ${!isOnline ? 'border-[#8a1f24] bg-[#fee2e2] text-[#8a1f24]' : 'border-[#0e620e] bg-[#dcfce7] text-[#0e620e]'}`}>
+            <span className={`w-2 h-2 rounded-full ${!isOnline ? 'bg-[#8a1f24]' : 'bg-[#0e620e]'}`}></span>
+            {!isOnline ? 'OFFLINE' : 'ONLINE'}
+          </div>
+
+          {/* Selector de Idioma */}
+          <div className="flex items-center rounded border border-[#c8c6c4] bg-[#f9f9f9] p-0.5 text-xs font-semibold">
+            <button
+              onClick={() => changeLanguage('es')}
+              className={`px-2 py-0.5 rounded transition-all ${locale === 'es' ? 'bg-[#0078d4] text-white font-bold' : 'text-[#374151] hover:text-[#111827]'}`}
+              title="Español"
             >
-              <span className="nav-label">{t(item.labelKey)}</span>
-            </NavLink>
-          ))}
-        </nav>
+              ES
+            </button>
+            <span className="text-[#c8c6c4] px-0.5">|</span>
+            <button
+              onClick={() => changeLanguage('pt')}
+              className={`px-2 py-0.5 rounded transition-all ${locale === 'pt' ? 'bg-[#0078d4] text-white font-bold' : 'text-[#374151] hover:text-[#111827]'}`}
+              title="Português"
+            >
+              PT
+            </button>
+          </div>
 
-        {/* Selector de Idioma Manual */}
-        <div className="language-selector">
-          <button 
-            onClick={() => changeLanguage('es')} 
-            className={`lang-btn ${locale === 'es' ? 'active' : ''}`}
-            title="Español"
-          >
-            ES
-          </button>
-          <span className="lang-divider">|</span>
-          <button 
-            onClick={() => changeLanguage('pt')} 
-            className={`lang-btn ${locale === 'pt' ? 'active' : ''}`}
-            title="Português (Brasil)"
-          >
-            PT
-          </button>
-        </div>
-
-        <div className="sidebar-footer">
-          <div className="auditor-profile">
-            <div className="profile-avatar">
+          {/* Perfil Auditor */}
+          <div className="flex items-center gap-2 pl-2 border-l border-[#c8c6c4]">
+            <div className="w-7 h-7 rounded-full bg-[#0078d4] text-white flex items-center justify-center text-xs font-bold shadow-xs">
               {auditorName ? auditorName.trim().charAt(0).toUpperCase() : 'OP'}
             </div>
-            <div className="profile-info">
-              <span className="profile-title">{t('shiftActive')}</span>
-              <span className="profile-name" title={auditorName}>{auditorName || 'N/A'}</span>
-            </div>
+            <span className="hidden md:inline text-xs md:text-sm font-semibold text-[#111827] max-w-[140px] truncate" title={auditorName}>
+              {auditorName || 'Auditor'}
+            </span>
           </div>
-          <button onClick={handleLogout} className="btn-logout" title={t('endShift')}>
+
+          {/* Botón Salir */}
+          <button
+            onClick={handleLogout}
+            className="cursor-pointer rounded border border-[#c8c6c4] px-3 py-1 text-xs font-semibold uppercase text-[#8a1f24] transition-all hover:bg-[#fee2e2] hover:border-[#f8b8bc]"
+            title={t('endShift')}
+          >
             {t('endShift')}
           </button>
         </div>
-      </aside>
+      </header>
+
+      {/* Menú Lateral Desplegable Sincronizado a 48px */}
+      <div
+        className={`fixed left-0 z-[999] w-64 overflow-y-auto border-r border-[#c8c6c4] bg-[#f9f9f9] shadow-xl transition-transform duration-300 ease-in-out print:hidden no-print ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}
+        style={{ top: '48px', height: 'calc(100vh - 48px)' }}
+      >
+        <nav className="py-3">
+          {navSections.map((section, sIdx) => (
+            <div key={sIdx} className="px-4 mb-3">
+              <div className={`mb-1.5 px-2 text-xs font-bold uppercase tracking-wider text-[#374151] ${sIdx > 0 ? 'border-t border-[#c8c6c4] pt-2.5' : ''}`}>
+                {section.title}
+              </div>
+              {section.items.map((item) => {
+                const isActive = location.pathname === item.path || (item.path !== '/' && location.pathname.startsWith(item.path));
+                return (
+                  <div key={item.path} className="group/item flex items-center justify-between pr-2 transition-all hover:bg-[#ececec]">
+                    <Link
+                      to={item.path}
+                      onClick={() => setIsMenuOpen(false)}
+                      className={`flex-grow flex cursor-pointer items-center border-l-[4px] px-3 py-2 leading-tight transition-all ${
+                        isActive
+                          ? 'border-[#0078d4] bg-[#e5e5e5] font-bold text-[#0078d4]'
+                          : 'border-transparent text-[#111827] font-medium hover:border-[#0078d4]/50'
+                      }`}
+                    >
+                      <span className="text-sm select-none">{t(item.labelKey) || item.label}</span>
+                    </Link>
+                  </div>
+                );
+              })}
+            </div>
+          ))}
+
+          <div className="px-4 mt-4 pt-3 border-t border-[#c8c6c4]">
+            <button
+              onClick={handleLogout}
+              className="mt-1 flex w-full cursor-pointer items-center justify-start border-l-[4px] border-transparent px-3 py-2 text-left text-sm font-bold uppercase text-[#8a1f24] transition-all hover:bg-[#fee2e2]"
+            >
+              {t('endShift')}
+            </button>
+          </div>
+        </nav>
+      </div>
+
+      {/* Overlay translúcido al abrir menú */}
+      <div
+        className={`fixed inset-0 z-[998] bg-black/20 backdrop-blur-sm transition-opacity print:hidden no-print ${isMenuOpen ? 'visible opacity-100' : 'invisible opacity-0'}`}
+        style={{ top: '48px' }}
+        onClick={toggleMenu}
+      />
 
       {/* Contenedor Principal */}
-      <main className="main-content">
-        <header className="page-header no-print">
-          <div>
-            <h1>{getTranslatedTitle(title)}</h1>
-            <p className="page-subtitle">LOGIX - SISTEMA DE CONTROL DE EMPAQUE</p>
-          </div>
-        </header>
-
-        <div className="page-body">
+      <main className="main-content flex-grow overflow-y-auto overflow-x-hidden bg-[#f3f3f3] p-4 sm:p-6 print:h-auto print:overflow-visible">
+        <div className="container-wrapper max-w-7xl mx-auto">
           {children}
         </div>
       </main>
-
-      <style dangerouslySetInnerHTML={{
-        __html: `
-        .sidebar {
-          width: 260px;
-          background-color: var(--accent);
-          color: white;
-          display: flex;
-          flex-direction: column;
-          border-right: 1px solid rgba(255,255,255,0.1);
-          flex-shrink: 0;
-          padding: 1.5rem 1rem;
-        }
-
-        .sidebar-logo {
-          display: flex;
-          align-items: center;
-          gap: 0.75rem;
-          margin-bottom: 2.5rem;
-          padding-left: 0.5rem;
-        }
-
-        .logo-text h2 {
-          color: white;
-          font-size: 1.25rem;
-          font-weight: 700;
-          line-height: 1.1;
-          letter-spacing: 0.1em;
-        }
-
-        .logo-dot {
-          color: var(--primary);
-        }
-
-        .logo-text span {
-          font-size: 0.55rem;
-          color: var(--text-light);
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          max-width: 150px;
-          display: block;
-          margin-top: 0.2rem;
-        }
-
-        .sidebar-nav {
-          display: flex;
-          flex-direction: column;
-          gap: 0.35rem;
-          flex-grow: 1;
-        }
-
-        .nav-item {
-          display: flex;
-          align-items: center;
-          padding: 0.75rem 1rem 0.75rem 1.25rem;
-          border-radius: var(--radius-sm);
-          color: #94a3b8;
-          text-decoration: none;
-          font-size: 0.9rem;
-          font-weight: 500;
-          transition: var(--transition-fast);
-          position: relative;
-        }
-
-        .nav-item:hover {
-          color: white;
-          background-color: rgba(255,255,255,0.03);
-        }
-
-        .nav-item.active {
-          color: white;
-          background-color: rgba(255,255,255,0.06);
-          font-weight: 600;
-        }
-
-        .nav-item.active::before {
-          content: "";
-          position: absolute;
-          left: 0;
-          top: 0;
-          bottom: 0;
-          width: 3px;
-          background-color: var(--primary);
-          border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-        }
-
-        /* Selector de Idioma */
-        .language-selector {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 0.5rem;
-          margin-top: auto;
-          margin-bottom: 1rem;
-          padding: 0.4rem;
-          background: rgba(255, 255, 255, 0.03);
-          border-radius: var(--radius-sm);
-          border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .lang-btn {
-          background: transparent;
-          border: none;
-          color: #94a3b8;
-          font-size: 0.75rem;
-          font-weight: 600;
-          cursor: pointer;
-          transition: var(--transition-fast);
-          padding: 0.25rem 0.5rem;
-          border-radius: 4px;
-        }
-
-        .lang-btn:hover {
-          color: white;
-        }
-
-        .lang-btn.active {
-          color: white;
-          background-color: var(--primary);
-        }
-
-        .lang-divider {
-          color: rgba(255, 255, 255, 0.15);
-          font-size: 0.75rem;
-        }
-
-        .sidebar-footer {
-          border-top: 1px solid rgba(255,255,255,0.1);
-          padding-top: 1rem;
-          display: flex;
-          flex-direction: column;
-          gap: 0.75rem;
-        }
-
-        .auditor-profile {
-          display: flex;
-          align-items: center;
-          gap: 0.75rem;
-          background: rgba(255,255,255,0.03);
-          padding: 0.75rem;
-          border-radius: var(--radius-sm);
-          border: 1px solid rgba(255,255,255,0.05);
-        }
-
-        .profile-avatar {
-          font-size: 0.85rem;
-          font-weight: 600;
-          background: var(--primary);
-          color: white;
-          width: 32px;
-          height: 32px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          border-radius: 50%;
-        }
-
-        .profile-info {
-          display: flex;
-          flex-direction: column;
-          overflow: hidden;
-        }
-
-        .profile-title {
-          font-size: 0.65rem;
-          color: #94a3b8;
-          text-transform: uppercase;
-        }
-
-        .profile-name {
-          font-size: 0.85rem;
-          font-weight: 600;
-          color: white;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
-
-        .btn-logout {
-          background: transparent;
-          border: 1px solid rgba(239, 68, 68, 0.3);
-          color: #f87171;
-          height: 36px;
-          border-radius: var(--radius-sm);
-          font-size: 0.8rem;
-          font-weight: 500;
-          cursor: pointer;
-          transition: var(--transition-fast);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 100%;
-        }
-
-        .btn-logout:hover {
-          background: rgba(239, 68, 68, 0.1);
-          border-color: #ef4444;
-        }
-
-        .page-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          border-bottom: 1px solid var(--border-color);
-          padding-bottom: 1.25rem;
-          margin-bottom: 2rem;
-        }
-
-        .page-subtitle {
-          font-size: 0.65rem;
-          font-weight: 600;
-          letter-spacing: 0.05em;
-          color: var(--text-light);
-          margin-top: 0.15rem;
-        }
-
-
-
-        @media (max-width: 768px) {
-          .app-container {
-            flex-direction: column;
-          }
-          .sidebar {
-            width: 100%;
-            padding: 1rem;
-          }
-          .sidebar-logo {
-            margin-bottom: 1rem;
-          }
-          .language-selector {
-            margin-top: 1rem;
-            margin-bottom: 1rem;
-          }
-          .sidebar-footer {
-            display: none; /* Simplificado en mobile */
-          }
-        }
-      `}} />
     </div>
   );
 };

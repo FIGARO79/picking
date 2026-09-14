@@ -1,0 +1,300 @@
+/* src/styles/FluentPages.css — Shared Windows Fluent overrides */
+
+.picking-audit-page,
+.picking-audit-history-page,
+.shipments-page,
+.packing-list-print-page,
+.dashboard-page,
+.settings-page,
+.login-page {
+    --fluent-primary: #0078d4;
+    --fluent-primary-dark: #106ebe;
+    --fluent-text: #111827;
+    --fluent-muted: #374151;
+    --fluent-border: #c8c6c4;
+    --fluent-surface: #ffffff;
+    --fluent-subtle: #f9f9f9;
+    font-family: var(--logix-font-family, 'Segoe UI', 'Segoe', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', Arial, sans-serif);
+    color: var(--fluent-text);
+}
+
+/* Shared rules using CSS nesting */
+.picking-audit-page,
+.picking-audit-history-page,
+.shipments-page,
+.packing-list-print-page,
+.dashboard-page,
+.settings-page,
+.login-page {
+
+    font-family: var(--logix-font-family, 'Segoe UI', 'Segoe', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', Arial, sans-serif);
+
+    /* Form controls inherit font */
+    & button,
+    & input,
+    & select,
+    & textarea {
+        font-family: inherit;
+    }
+
+    /* Border radius normalization */
+    & .rounded-xl,
+    & .rounded-lg,
+    & .rounded-md,
+    & .rounded {
+        border-radius: 4px;
+    }
+
+    & .rounded-full {
+        border-radius: 9999px;
+    }
+
+    /* Fluent UI Progress Spinner */
+    & .fluent-spinner {
+        border-radius: 9999px;
+        border-style: solid;
+        border-color: #edebe9;
+        border-top-color: #0078d4;
+    }
+
+    /* Shadows */
+    & .shadow-sm,
+    & .shadow-md,
+    & .shadow,
+    & .shadow-lg,
+    & .shadow-xl {
+        box-shadow: 0 1px 3px rgba(32, 31, 30, 0.12);
+    }
+
+    /* Borders */
+    & .border-gray-200,
+    & .border-gray-300,
+    & .border-gray-100,
+    & .border-slate-200,
+    & .border-slate-100,
+    & .border-slate-300,
+    & .border-zinc-200,
+    & .border-zinc-100,
+    & .border-zinc-300 {
+        border-color: var(--fluent-border);
+    }
+
+    /* Background surfaces */
+    & .bg-gray-50,
+    & .bg-gray-100,
+    & .bg-slate-50,
+    & .bg-slate-100,
+    & .bg-zinc-50,
+    & .bg-zinc-100 {
+        background-color: var(--fluent-subtle);
+    }
+
+    /* Typography */
+    & h1, & h2, & h3, & h4 {
+        font-weight: 600;
+        letter-spacing: 0;
+        color: var(--fluent-text);
+    }
+
+    /* Form labels */
+    & .form-label {
+        font-size: 0.8125rem;
+        font-weight: 600;
+        letter-spacing: 0.025em;
+        color: var(--fluent-text);
+    }
+
+    /* Inputs */
+    & input:not([type='checkbox']):not([type='radio']),
+    & select,
+    & textarea {
+        border-color: #605e5c;
+        border-radius: 3px;
+        color: var(--fluent-text);
+        font-size: 0.9375rem;
+    }
+
+    & input:not([type='checkbox']):not([type='radio']):focus,
+    & select:focus,
+    & textarea:focus {
+        border-color: var(--fluent-primary) !important;
+        box-shadow: 0 0 0 1.5px var(--fluent-primary);
+    }
+
+    /* Table headers — Windows Fluent: neutral light (#f3f4f6) with high-contrast text (#111827) */
+    & table thead,
+    & table thead tr,
+    & table thead th,
+    & table th,
+    & thead,
+    & thead tr,
+    & thead th {
+        background: #f3f4f6 !important;
+        background-color: #f3f4f6 !important;
+        color: #111827 !important;
+        border-color: var(--fluent-border) !important;
+        font-size: 0.8125rem !important; /* 13px */
+        font-weight: 700 !important;
+        letter-spacing: 0.025em;
+    }
+
+    /* Force all header variants to light with dark text */
+    & thead[class*="bg-"],
+    & thead tr[class*="bg-"],
+    & thead th[class*="bg-"],
+    & thead tr[style*="background"],
+    & thead th[style*="background"],
+    & tr[style*="#354a5f"],
+    & tr[style*="#111827"],
+    & tr[style*="#1e4a74"],
+    & tr[style*="#3d5068"],
+    & th[style*="linear-gradient"],
+    & th[style*="#3d5068"] {
+        background: #f3f4f6 !important;
+        background-color: #f3f4f6 !important;
+        color: #111827 !important;
+        font-size: 0.8125rem !important;
+        font-weight: 700 !important;
+    }
+
+    /* Ensure all text, icons, and spans inside headers inherit the dark text color */
+    & thead th *,
+    & thead tr *,
+    & table th * {
+        color: #111827 !important;
+    }
+
+    /* Table body */
+    & tbody tr:hover {
+        background-color: #f3f9fd !important;
+    }
+
+    /* Table body font size and comfortable vertical padding */
+    & tbody td,
+    & table tbody td,
+    & .sap-table tbody td,
+    & .logix-table tbody td {
+        font-size: 0.9375rem !important; /* 15px */
+        line-height: 1.35rem !important;
+        padding-top: 0.3125rem !important; /* 5px compact and readable */
+        padding-bottom: 0.3125rem !important;
+        color: #111827 !important;
+    }
+
+    & thead th,
+    & table thead th,
+    & .sap-table thead th,
+    & .logix-table thead th {
+        padding-top: 0.375rem !important; /* 6px */
+        padding-bottom: 0.375rem !important;
+    }
+
+    & td, & th {
+        border-bottom-color: var(--fluent-border) !important;
+    }
+
+    /* Dividers */
+    & [class*="divide-"] > * + * {
+        border-color: var(--fluent-border);
+    }
+
+    /* Border separators */
+    & .border-t,
+    & .border-b {
+        border-color: var(--fluent-border);
+    }
+
+    /* Status badges — Fluent high-contrast semantic colors */
+    & .bg-green-100,
+    & .bg-emerald-100 {
+        background-color: #dcfce7;
+    }
+
+    & .bg-red-100,
+    & .bg-red-50 {
+        background-color: #fee2e2;
+    }
+
+    & .bg-yellow-100,
+    & .bg-amber-100,
+    & .bg-orange-100 {
+        background-color: #fef3c7;
+    }
+
+    & .bg-blue-100 {
+        background-color: #e0f2fe;
+    }
+
+    /* Semantic text */
+    & .text-emerald-700,
+    & .text-emerald-800,
+    & .text-green-700,
+    & .text-green-800 {
+        color: #0e620e !important;
+        font-weight: 600;
+    }
+
+    & .text-red-700,
+    & .text-red-800 {
+        color: #8a1f24 !important;
+        font-weight: 600;
+    }
+
+    & .text-amber-700,
+    & .text-amber-800,
+    & .text-orange-700 {
+        color: #8a3b07 !important;
+        font-weight: 600;
+    }
+
+    /* Muted text — High-contrast deep neutral (#374151) */
+    & .text-gray-500,
+    & .text-gray-400,
+    & .text-slate-500,
+    & .text-slate-400,
+    & .text-zinc-500,
+    & .text-zinc-400 {
+        color: var(--fluent-muted) !important;
+    }
+
+    /* Item code links */
+    & [class*="text-[#1e4a74]"] {
+        color: var(--fluent-primary-dark);
+    }
+
+    /* Primary action buttons */
+    & .bg-emerald-600,
+    & .bg-emerald-700 {
+        background-color: var(--fluent-primary) !important;
+    }
+
+    & .bg-emerald-600:hover:not(:disabled),
+    & .bg-emerald-700:hover:not(:disabled) {
+        background-color: var(--fluent-primary-dark) !important;
+    }
+
+    /* Data field (readonly display) */
+    & .data-field {
+        background-color: var(--fluent-subtle);
+        border-color: var(--fluent-border);
+        border-radius: 2px;
+    }
+}
+
+/* Login family pages */
+.login-page .logix-login-card {
+    border-radius: 4px;
+    border-top-color: var(--fluent-primary);
+}
+
+/* Responsive */
+@media (max-width: 1023px) {
+    .picking-audit-page,
+    .picking-audit-history-page,
+    .shipments-page,
+    .dashboard-page,
+    .settings-page {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+}
