@@ -1,0 +1,437 @@
+/* src/styles/Global.css */
+/* ===== System Font Stack (Segoe UI Native Performance) ===== */
+/* Using native system fonts for maximum performance and zero external dependencies */
+
+/* ===== SAP Fiori Inspired Theme (Quartz Light / Belize) ===== */
+:root {
+    /* Colors */
+    --logix-primary: #0078d4;
+    /* Fluent Blue */
+    --logix-primary-dark: #106ebe;
+    --logix-accent: #eebf22;
+    /* Gold/Yellow */
+    --logix-bg: #f3f3f3;
+    /* Light Background */
+    --logix-surface: #ffffff;
+    --logix-text: #111827;
+    --logix-text-light: #374151;
+    --logix-border: #c8c6c4;
+    --logix-input-border: #605e5c;
+
+    /* Semantic Colors */
+    --logix-success: #0e620e;
+    --logix-warning: #8a3b07;
+    --logix-error: #a4262c;
+    --logix-critical: #8a3b07;
+    --logix-negative: #a4262c;
+    --logix-positive: #0e620e;
+    --logix-informative: #005a9e;
+    --logix-neutral: #374151;
+
+    /* Shell / Header */
+    --logix-shell-bg: #354a5f;
+    --logix-shell-text: #ffffff;
+
+    /* Tables */
+    --logix-table-header-bg: #f3f4f6;
+    --logix-table-border: #d2d0ce;
+    --logix-list-hover: #f3f9fd;
+
+    /* Fonts - Modern Segoe UI System Font Stack */
+    --logix-font-family: 'Segoe UI', 'Segoe', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', Arial, sans-serif;
+    --logix-font-size: 0.9375rem;
+    /* 15px */
+
+    /* Compatibilidad con variables legacy */
+    --font-sans: var(--logix-font-family);
+    --font-mono: Consolas, 'Segoe UI Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, 'Courier New', monospace;
+    --primary: #0078d4;
+    --primary-hover: #106ebe;
+    --bg-app: #f3f3f3;
+    --bg-card: #ffffff;
+    --border-color: #c8c6c4;
+    --accent: #354a5f;
+    --success: #0e620e;
+    --warning: #8a3b07;
+    --danger: #a4262c;
+}
+
+body {
+    margin: 0;
+    font-family: var(--logix-font-family);
+    font-size: var(--logix-font-size);
+    background-color: var(--logix-bg);
+    color: var(--logix-text);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    line-height: 1.45;
+}
+
+/* Layout General */
+.container-wrapper {
+    width: 100%;
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 1.5rem;
+}
+
+/* ===== Typography ===== */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-weight: normal;
+    color: var(--logix-text);
+}
+
+/* ===== SAP Fiori Shell Bar (Header) ===== */
+.logix-shell-bar {
+    background-color: var(--logix-shell-bg);
+    color: var(--logix-shell-text);
+    height: 48px;
+    display: flex;
+    align-items: center;
+    padding: 0 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+}
+
+.top-header {
+    background-color: #ffffff;
+    color: #201f1e;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    padding: 0 1rem;
+    box-shadow: none;
+    position: sticky;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+}
+
+.logix-shell-title {
+    font-size: 1.125rem;
+    font-weight: 400;
+    letter-spacing: 0;
+    margin: 0;
+    color: var(--logix-shell-text);
+}
+
+.header-title {
+    font-size: 1rem;
+    font-weight: 400;
+    margin: 0;
+    color: #fff;
+}
+
+/* ===== Cards / Tiles ===== */
+.logix-tile,
+.logix-card,
+.bg-white.shadow {
+    background-color: var(--logix-surface);
+    border-radius: 0.25rem;
+    /* 4px */
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid transparent;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.logix-tile:hover {
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.logix-login-card {
+    background-color: var(--logix-surface);
+    border-radius: 0.25rem;
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.1), 0 8px 16px rgba(0, 0, 0, 0.1);
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 400px;
+    border-top: 4px solid var(--logix-primary);
+}
+
+/* ===== Forms & Inputs ===== */
+.logix-label,
+.form-label {
+    display: block;
+    font-size: 0.8125rem;
+    /* 13px */
+    color: var(--logix-text);
+    margin-bottom: 0.35rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.logix-input,
+input[type="text"],
+input[type="number"],
+input[type="password"],
+input[type="email"],
+select {
+    width: 100%;
+    border: 1px solid var(--logix-input-border);
+    padding: 0.375rem 0.625rem;
+    border-radius: 0.25rem;
+    background-color: transparent;
+    font-family: inherit;
+    font-size: 0.9375rem;
+    color: var(--logix-text);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+    height: 34px;
+}
+
+.logix-input:focus,
+input:focus,
+select:focus {
+    border-color: var(--logix-primary);
+    box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.2);
+}
+
+/* Underlined input style variant */
+.logix-input-underlined {
+    border: none;
+    border-bottom: 1px solid var(--logix-input-border);
+    border-radius: 0;
+    padding: 0.5rem 0;
+}
+
+.logix-input-underlined:focus {
+    border-bottom: 2px solid var(--logix-primary);
+    box-shadow: none;
+}
+
+.data-field {
+    background-color: #f8f9fa;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.25rem;
+    min-height: 36px;
+    border: 1px solid var(--logix-border);
+    color: var(--logix-text);
+    font-size: 0.9375rem;
+    display: flex;
+    align-items: center;
+}
+
+/* ===== Buttons ===== */
+.logix-button,
+.btn-logix,
+.btn-sap,
+.btn {
+    font-family: inherit;
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding: 0 1rem;
+    height: 34px;
+    border-radius: 0.25rem;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    text-decoration: none;
+}
+
+/* Primary Button */
+.logix-button-primary,
+.btn-primary,
+.btn-sap.btn-primary,
+.btn-logix.btn-primary {
+    background-color: var(--logix-primary);
+    color: white;
+    border-color: var(--logix-primary);
+}
+
+.logix-button-primary:hover:not(:disabled),
+.btn-primary:hover:not(:disabled),
+.btn-sap.btn-primary:hover:not(:disabled) {
+    background-color: var(--logix-primary-dark);
+    border-color: var(--logix-primary-dark);
+}
+
+/* Secondary / Ghost Button */
+.logix-button-secondary,
+.btn-secondary,
+.btn-sap.btn-secondary {
+    background-color: transparent;
+    color: var(--logix-shell-bg);
+    border-color: var(--logix-border);
+}
+
+.logix-button-secondary:hover:not(:disabled),
+.btn-secondary:hover:not(:disabled),
+.btn-sap.btn-secondary:hover:not(:disabled) {
+    background-color: rgba(0, 120, 212, 0.05);
+    border-color: var(--logix-primary);
+    color: var(--logix-primary);
+}
+
+/* Negative / Danger Button */
+.logix-button-negative,
+.btn-danger {
+    background-color: transparent;
+    color: var(--logix-error);
+    border-color: var(--logix-error);
+}
+
+.logix-button-negative:hover:not(:disabled),
+.btn-danger:hover:not(:disabled) {
+    background-color: rgba(187, 0, 0, 0.05);
+}
+
+/* Success Button */
+.logix-button-success,
+.btn-success {
+    background-color: var(--logix-success);
+    color: white;
+    border-color: var(--logix-success);
+}
+
+.logix-button-success:hover:not(:disabled),
+.btn-success:hover:not(:disabled) {
+    background-color: #0d6b34;
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: #e5e5e5;
+    color: #999;
+    border-color: #d9d9d9;
+}
+
+/* ===== Tables ===== */
+.logix-table,
+.sap-table,
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9375rem;
+}
+
+.logix-table th,
+.sap-table th,
+table th {
+    text-align: left;
+    padding: 0.375rem 0.5rem;
+    background-color: var(--logix-table-header-bg);
+    color: var(--logix-text);
+    font-weight: 600;
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--logix-table-border);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.logix-table td,
+.sap-table td,
+table td {
+    padding: 0.3125rem 0.5rem;
+    border-bottom: 1px solid var(--logix-table-border);
+    color: var(--logix-text);
+    vertical-align: middle;
+}
+
+.logix-table tr:hover,
+.sap-table tr:hover,
+table tbody tr:hover {
+    background-color: var(--logix-list-hover);
+}
+
+/* ===== Alerts / Message Strips ===== */
+.logix-message-strip,
+.alert,
+.message-strip {
+    padding: 0.75rem 1rem;
+    border-radius: 0.25rem;
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    border-left: 0.25rem solid;
+    background-color: var(--logix-surface);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.alert-success,
+.message-strip.success {
+    border-left-color: var(--logix-success);
+    background-color: #f1fdf6;
+    color: #0d6b34;
+}
+
+.alert-error,
+.message-strip.error {
+    border-left-color: var(--logix-error);
+    background-color: #fef6f6;
+    color: #bb0000;
+}
+
+.alert-info,
+.message-strip.information {
+    border-left-color: var(--logix-informative);
+    background-color: #f0f7fe;
+    color: #085ca9;
+}
+
+.alert-warning,
+.message-strip.warning {
+    border-left-color: var(--logix-warning);
+    background-color: #fef9f0;
+    color: #aa5300;
+}
+
+/* ===== Utilities ===== */
+.text-logix-primary {
+    color: var(--logix-primary);
+}
+
+.text-logix-text {
+    color: var(--logix-text);
+}
+
+.text-logix-text-light {
+    color: var(--logix-text-light);
+}
+
+/* Animation Utils */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.3s ease-out forwards;
+}
+
+/* Responsive Overrides */
+@media (max-width: 640px) {
+    .container-wrapper {
+        padding: 1rem;
+    }
+
+    .logix-shell-bar {
+        padding: 0 0.5rem;
+    }
+}

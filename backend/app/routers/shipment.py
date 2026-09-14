@@ -1,10 +1,13 @@
+import os
 import datetime
+import polars as pl
 from fastapi import APIRouter, Depends, HTTPException, status, Header
 from fastapi.responses import ORJSONResponse
 from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from app.core.config import PICKING_CSV_PATH
 from app.core.db import get_db
 from app.core.i18n import get_message
 from app.models.schemas import ShipmentCreate, ShipmentUpdate
@@ -180,13 +183,38 @@ async def get_consolidated_packing_list(
                 detail=get_message("shipment_already_cancelled", accept_language)
             )
             
+        # Cargar mapa de pesos unitarios desde CSV como fallback
+        item_weights_csv = {}
+        if os.path.exists(PICKING_CSV_PATH):
+            try:
+                df_csv = pl.read_csv(PICKING_CSV_PATH, infer_schema_length=0)
+                df_csv.columns = [c.lstrip('\ufeff') for c in df_csv.columns]
+                w_col = next((c for c in df_csv.columns if c.strip().lower() in ["item_weight", "item weight", "itemweight", "weight"]), None)
+                if w_col and "ITEM" in df_csv.columns:
+                    for r in df_csv.select(["ITEM", w_col]).unique(subset=["ITEM"]).iter_rows(named=True):
+                        try:
+                            val_str = str(r[w_col] or "").replace(',', '.').strip()
+                            item_weights_csv[str(r["ITEM"]).strip().upper()] = float(val_str) if val_str else 0.0
+                        except:
+                            pass
+            except:
+                pass
+
         orders = []
         for link in shipment.audit_links:
             audit = link.audit
             
-            # Mapeo de order_line
+            # Mapeo de order_line y item_weight
             items_res = await db.execute(select(PickingAuditItem).where(PickingAuditItem.audit_id == audit.id))
-            items_map = {item.item_code: item.order_line for item in items_res.scalars().all()}
+            items_map = {}
+            items_weight_map = {}
+            for item in items_res.scalars().all():
+                code_key = str(item.item_code or "").strip().upper()
+                items_map[item.item_code] = item.order_line
+                w = getattr(item, 'item_weight', 0.0) or 0.0
+                if w <= 0.0 and code_key in item_weights_csv:
+                    w = item_weights_csv[code_key]
+                items_weight_map[code_key] = round(w, 3)
             
             # Cargar items de bultos
             pkg_res = await db.execute(
@@ -197,15 +225,29 @@ async def get_consolidated_packing_list(
             package_items = pkg_res.scalars().all()
             
             packages = {}
+            packages_net_weights = {}
             for item in package_items:
                 pkg_num = str(item.package_number)
                 if pkg_num not in packages:
                     packages[pkg_num] = []
+                    packages_net_weights[pkg_num] = 0.0
+
+                code_key = str(item.item_code or "").strip().upper()
+                unit_w = items_weight_map.get(code_key, 0.0)
+                if unit_w <= 0.0 and code_key in item_weights_csv:
+                    unit_w = item_weights_csv[code_key]
+
+                qty = item.qty_scan or 0
+                line_w = round(unit_w * qty, 3)
+                packages_net_weights[pkg_num] = round(packages_net_weights[pkg_num] + line_w, 3)
+
                 packages[pkg_num].append({
                     "order_line": item.order_line or items_map.get(item.item_code, ""),
                     "item_code": item.item_code,
                     "description": item.description or "",
-                    "quantity": item.qty_scan
+                    "quantity": qty,
+                    "item_weight": round(unit_w, 3),
+                    "line_weight": line_w
                 })
                 
             # Cargar dimensiones de bultos
@@ -218,10 +260,14 @@ async def get_consolidated_packing_list(
                     "length": p.length or 0.0,
                     "width": p.width or 0.0,
                     "height": p.height or 0.0,
-                    "weight": p.weight or 0.0
+                    "weight": p.weight or 0.0,
+                    "net_weight": packages_net_weights.get(str(p.package_number), 0.0)
                 }
                 for p in pkg_dims_res.scalars().all()
             }
+
+            ord_net_wt = round(sum(packages_net_weights.values()), 3)
+            ord_gross_wt = round(sum((pd.get("weight") or 0.0) for pd in packages_dimensions.values()), 3)
                 
             orders.append({
                 "audit_id": audit.id,
@@ -230,9 +276,12 @@ async def get_consolidated_packing_list(
                 "customer_code": str(audit.customer_code or "").strip(),
                 "customer_name": str(audit.customer_name or "N/A").strip(),
                 "timestamp": audit.timestamp,
-                "total_packages": audit.packages or 0,
+                "total_packages": audit.packages or len(packages_dimensions) or len(packages) or 0,
                 "packages": packages,
-                "packages_dimensions": packages_dimensions
+                "packages_dimensions": packages_dimensions,
+                "packages_net_weights": packages_net_weights,
+                "total_net_weight": ord_net_wt,
+                "total_gross_weight": ord_gross_wt
             })
             
         return ORJSONResponse(content={

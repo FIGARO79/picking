@@ -31,19 +31,25 @@ const DimensionScanner = ({ packageNumber, onConfirm, onClose, initialData }) =>
   };
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-content dimension-modal" style={{ maxWidth: '420px' }}>
-        <div className="modal-header">
-          <h3>📐 Medir Bulto #{packageNumber}</h3>
-          <button onClick={onClose} className="close-btn">✕</button>
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded border border-[#d2d0ce] shadow-xl p-6 w-full max-w-sm border-t-4 border-t-[#0078d4] animate-fade-in">
+        <div className="flex justify-between items-center mb-3">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-[#201f1e]">
+            📐 Medir Bulto #{packageNumber}
+          </h3>
+          <button onClick={onClose} className="text-sm font-bold text-[#605e5c] hover:text-black cursor-pointer">✕</button>
         </div>
 
-        <form onSubmit={handleSubmit} className="modal-body">
-          <p className="dim-desc">Ingresa las dimensiones (cm) y peso (kg) del bulto actual para el Packing List.</p>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <p className="text-xs text-[#605e5c]">
+            Ingresa las dimensiones (cm) y peso (kg) del bulto actual para el Packing List.
+          </p>
           
-          <div className="dims-grid">
-            <div className="input-group">
-              <label className="form-label">Largo (cm)</label>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold uppercase text-[#201f1e] mb-1">
+                Largo (cm)
+              </label>
               <input
                 type="number"
                 step="0.1"
@@ -53,11 +59,14 @@ const DimensionScanner = ({ packageNumber, onConfirm, onClose, initialData }) =>
                 ref={lengthRef}
                 onFocus={(e) => e.target.select()}
                 required
+                className="w-full text-center font-mono font-medium rounded border border-[#8a8886] p-2 text-sm text-[#201f1e] outline-none focus:border-[#0078d4]"
               />
             </div>
 
-            <div className="input-group">
-              <label className="form-label">Ancho (cm)</label>
+            <div>
+              <label className="block text-xs font-semibold uppercase text-[#201f1e] mb-1">
+                Ancho (cm)
+              </label>
               <input
                 type="number"
                 step="0.1"
@@ -66,11 +75,14 @@ const DimensionScanner = ({ packageNumber, onConfirm, onClose, initialData }) =>
                 onChange={(e) => setWidth(e.target.value)}
                 onFocus={(e) => e.target.select()}
                 required
+                className="w-full text-center font-mono font-medium rounded border border-[#8a8886] p-2 text-sm text-[#201f1e] outline-none focus:border-[#0078d4]"
               />
             </div>
 
-            <div className="input-group">
-              <label className="form-label">Alto (cm)</label>
+            <div>
+              <label className="block text-xs font-semibold uppercase text-[#201f1e] mb-1">
+                Alto (cm)
+              </label>
               <input
                 type="number"
                 step="0.1"
@@ -79,11 +91,14 @@ const DimensionScanner = ({ packageNumber, onConfirm, onClose, initialData }) =>
                 onChange={(e) => setHeight(e.target.value)}
                 onFocus={(e) => e.target.select()}
                 required
+                className="w-full text-center font-mono font-medium rounded border border-[#8a8886] p-2 text-sm text-[#201f1e] outline-none focus:border-[#0078d4]"
               />
             </div>
 
-            <div className="input-group">
-              <label className="form-label">Peso (kg)</label>
+            <div>
+              <label className="block text-xs font-semibold uppercase text-[#201f1e] mb-1">
+                Peso (kg)
+              </label>
               <input
                 type="number"
                 step="0.01"
@@ -92,51 +107,28 @@ const DimensionScanner = ({ packageNumber, onConfirm, onClose, initialData }) =>
                 onChange={(e) => setWeight(e.target.value)}
                 onFocus={(e) => e.target.select()}
                 required
+                className="w-full text-center font-mono font-medium rounded border border-[#8a8886] p-2 text-sm text-[#201f1e] outline-none focus:border-[#0078d4]"
               />
             </div>
           </div>
 
-          <div className="modal-actions">
-            <button type="button" onClick={onClose} className="btn btn-secondary">
+          <div className="flex justify-end gap-2 pt-2">
+            <button 
+              type="button" 
+              onClick={onClose} 
+              className="rounded border border-[#d2d0ce] px-3 py-1.5 text-xs text-[#605e5c] hover:bg-[#f3f3f3] cursor-pointer"
+            >
               Cancelar
             </button>
-            <button type="submit" className="btn btn-primary">
+            <button 
+              type="submit" 
+              className="rounded bg-[#0078d4] px-4 py-1.5 text-xs font-medium uppercase tracking-wider text-white hover:bg-[#106ebe] transition-colors cursor-pointer shadow-xs"
+            >
               Guardar Medidas
             </button>
           </div>
         </form>
       </div>
-
-      <style dangerouslySetInnerHTML={{
-        __html: `
-        .dimension-modal {
-          border-top: 4px solid var(--primary);
-        }
-
-        .dim-desc {
-          font-size: 0.8rem;
-          color: var(--text-muted);
-          margin-bottom: 1.25rem;
-          line-height: 1.4;
-        }
-
-        .dims-grid {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 1rem;
-          margin-bottom: 1.5rem;
-        }
-
-        .dims-grid .input-group {
-          margin-bottom: 0;
-        }
-
-        .dims-grid input {
-          font-size: 1.1rem;
-          text-align: center;
-          font-weight: 500;
-        }
-      `}} />
     </div>
   );
 };

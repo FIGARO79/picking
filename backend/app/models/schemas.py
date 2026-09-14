@@ -7,6 +7,7 @@ class PickingAuditItem(BaseModel):
     order_line: Optional[str] = ''
     qty_req: int
     qty_scan: int
+    item_weight: Optional[float] = 0.0
 
 class PackageDimension(BaseModel):
     package_number: int

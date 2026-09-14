@@ -69,7 +69,16 @@ function App() {
           path="/settings" 
           element={
             <ProtectedRoute title={localStorage.getItem('auditor_lang') === 'pt' ? 'Configuração' : 'Configuración'}>
-              <Settings />
+              <Settings defaultTab="config" />
+            </ProtectedRoute>
+          } 
+        />
+
+        <Route 
+          path="/update" 
+          element={
+            <ProtectedRoute title={localStorage.getItem('auditor_lang') === 'pt' ? 'Carregar Arquivos' : 'Carga de Archivos'}>
+              <Settings defaultTab="upload" />
             </ProtectedRoute>
           } 
         />

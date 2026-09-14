@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from '../context/LanguageContext';
+import '../styles/FluentPages.css';
 
 const Login = () => {
   const [name, setName] = useState('');
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, locale, changeLanguage } = useTranslation();
 
   useEffect(() => {
     const stored = localStorage.getItem('auditor_name');
@@ -24,15 +25,22 @@ const Login = () => {
   };
 
   return (
-    <div className="login-overlay">
-      <div className="login-card">
-        <div className="login-logo">📦</div>
-        <h1>{t('welcomeTitle')}</h1>
-        <p className="login-subtitle">{t('welcomeSubtitle')}</p>
-        
-        <form onSubmit={handleSubmit} className="login-form">
-          <div className="input-group">
-            <label className="form-label">{t('auditorNameLabel')}</label>
+    <div className="login-page min-h-screen flex flex-col items-center justify-center bg-[#f3f3f3] p-4">
+      <div className="logix-login-card bg-white p-8 rounded border border-[#c8c6c4] shadow-md w-full max-w-sm">
+        <div className="text-center mb-6">
+          <div className="text-3xl font-bold tracking-wider text-[#111827]">
+            LOGIX<span className="text-[#0078d4]">.</span>
+          </div>
+          <h1 className="text-sm font-semibold text-[#374151] uppercase tracking-wider mt-1.5">
+            {t('welcomeSubtitle')}
+          </h1>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-xs md:text-sm font-bold uppercase tracking-wider text-[#111827] mb-1.5">
+              {t('auditorNameLabel')}
+            </label>
             <input
               type="text"
               value={name}
@@ -40,106 +48,39 @@ const Login = () => {
               placeholder={t('auditorNamePlaceholder')}
               required
               autoFocus
+              className="w-full rounded border border-[#605e5c] p-2.5 text-sm font-medium text-[#111827] outline-none focus:border-[#0078d4] focus:ring-1 focus:ring-[#0078d4]"
             />
           </div>
 
-          <button type="submit" className="btn btn-primary login-btn">
+          <button
+            type="submit"
+            className="w-full bg-[#0078d4] text-white py-2.5 rounded text-xs md:text-sm font-bold uppercase tracking-wider hover:bg-[#106ebe] transition-colors cursor-pointer shadow-xs"
+          >
             {t('startShiftBtn')}
           </button>
         </form>
+
+        {/* Selector de idioma */}
+        <div className="mt-6 pt-4 border-t border-[#e5e7eb] flex justify-center items-center gap-2 text-xs font-semibold">
+          <button
+            onClick={() => changeLanguage('es')}
+            className={`px-2.5 py-1 rounded transition-colors ${
+              locale === 'es' ? 'bg-[#0078d4] text-white font-bold' : 'text-[#374151] hover:text-[#111827]'
+            }`}
+          >
+            ES
+          </button>
+          <span className="text-[#c8c6c4]">|</span>
+          <button
+            onClick={() => changeLanguage('pt')}
+            className={`px-2.5 py-1 rounded transition-colors ${
+              locale === 'pt' ? 'bg-[#0078d4] text-white font-bold' : 'text-[#374151] hover:text-[#111827]'
+            }`}
+          >
+            PT
+          </button>
+        </div>
       </div>
-
-
-      <style dangerouslySetInnerHTML={{
-        __html: `
-        .login-overlay {
-          position: fixed;
-          inset: 0;
-          background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 1.5rem;
-          font-family: var(--font-sans);
-        }
-
-        .login-card {
-          background-color: white;
-          border-radius: var(--radius-lg);
-          padding: 3rem 2.5rem;
-          width: 100%;
-          max-width: 440px;
-          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-          text-align: center;
-          animation: card-enter 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        @keyframes card-enter {
-          from {
-            opacity: 0;
-            transform: scale(0.95) translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: scale(1) translateY(0);
-          }
-        }
-
-        .login-logo {
-          font-size: 3rem;
-          margin-bottom: 1rem;
-          display: inline-block;
-          background: #f1f5f9;
-          width: 72px;
-          height: 72px;
-          line-height: 72px;
-          border-radius: var(--radius-md);
-        }
-
-        .login-card h1 {
-          font-size: 1.5rem;
-          font-weight: 700;
-          color: #0f172a;
-          margin-bottom: 0.25rem;
-        }
-
-        .login-subtitle {
-          font-size: 0.7rem;
-          font-weight: 700;
-          letter-spacing: 0.1em;
-          color: var(--text-muted);
-          text-transform: uppercase;
-          margin-bottom: 2.5rem;
-        }
-
-        .login-form {
-          text-align: left;
-        }
-
-        .login-form .input-group {
-          margin-bottom: 1.5rem;
-        }
-
-        .login-form input {
-          height: 48px !important;
-          font-size: 1rem !important;
-          border: 2px solid var(--border-color) !important;
-          border-radius: var(--radius-md) !important;
-        }
-
-        .login-form input:focus {
-          border-color: var(--primary) !important;
-        }
-
-        .login-btn {
-          width: 100%;
-          height: 48px;
-          font-size: 1rem;
-          font-weight: 600;
-          border-radius: var(--radius-md);
-          background-color: var(--primary);
-        }
-      `}} />
     </div>
   );
 };
